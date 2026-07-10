@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptWorkx — AI Workflow Consulting, Brisbane | Practical AI for Real Business Results</title>
+<meta name="description" content="Brisbane AI workflow consulting for small business. Chris Carroll shows owners how orchestrated AI collapses timelines — from a $100 AI Power Hour to a full AI Opportunity Audit. Practical AI for real business results.">
+<meta property="og:title" content="PromptWorkx — AI Workflow Consulting, Brisbane">
+<meta property="og:description" content="A six-week campaign, finished in 13 hours. See what an orchestrated AI system does when it's pointed at your business.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://promptworkx.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E1B2C;
+  --navy-2:#16263B;
+  --paper:#FAFAF7;
+  --ink:#1D2A3A;
+  --ink-soft:#4A5A6E;
+  --maroon:#7E1F32;
+  --maroon-deep:#5E1625;
+  --amber:#E8A13D;
+  --line:#DCE0E4;
+  --line-dark:rgba(255,255,255,.14);
+  --display:'Barlow Condensed',sans-serif;
+  --body:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+body{font-family:var(--body);color:var(--ink);background:var(--paper);line-height:1.6;font-size:17px}
+a{color:var(--maroon)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.eyebrow--dark{color:var(--maroon)}
+h1,h2,h3{font-family:var(--display);line-height:1.02;text-transform:uppercase;letter-spacing:.01em}
+.btn{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;font-size:1.15rem;font-weight:700;text-decoration:none;padding:14px 28px;border:2px solid transparent}
+.btn--primary{background:var(--maroon);color:#fff}
+.btn--primary:hover{background:var(--maroon-deep)}
+.btn--ghost{border-color:var(--line-dark);color:#fff}
+.btn--ghost:hover{border-color:var(--amber);color:var(--amber)}
+.btn--dark{background:var(--navy);color:#fff}
+.btn--dark:hover{background:var(--navy-2)}
+
+/* ── Header ─────────────────────────── */
+header{background:var(--navy);color:#fff;padding:20px 0;border-bottom:1px solid var(--line-dark)}
+header .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:800;font-size:1.5rem;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-decoration:none}
+.logo span{color:var(--amber)}
+nav a{color:#fff;text-decoration:none;font-size:.95rem;font-weight:500;margin-left:22px}
+nav a:hover{color:var(--amber)}
+
+/* ── Hero ───────────────────────────── */
+.hero{background:var(--paper);color:var(--ink);padding:88px 0 56px;border-bottom:1px solid var(--line)}
+.hero .eyebrow{color:var(--maroon)}
+.hero h1{font-size:clamp(3rem,8vw,5.6rem);font-weight:800;margin:14px 0 22px;max-width:18ch;color:var(--navy)}
+.hero h1 em{font-style:normal;color:var(--maroon)}
+.hero p.lede{font-size:1.2rem;max-width:56ch;color:var(--ink-soft);margin-bottom:34px}
+.hero .ctas{display:flex;gap:14px;flex-wrap:wrap}
+.btn--outline{border-color:var(--navy);color:var(--navy)}
+.btn--outline:hover{background:var(--navy);color:#fff}
+
+/* ── Run sheet (signature) ──────────── */
+.runsheet{background:#F1F0EB;color:var(--ink);padding:64px 0 72px;border-bottom:1px solid var(--line)}
+.runsheet .eyebrow{color:var(--maroon)}
+.runsheet .wrap>p{color:var(--ink-soft);max-width:60ch;margin:10px 0 34px}
+.sheet{background:#fff;border:1px solid var(--line);box-shadow:0 2px 0 rgba(29,42,58,.06);padding:8px 22px}
+.row{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:16px 2px;border-bottom:1px dashed var(--line);align-items:baseline}
+.row:last-child{border-bottom:none}
+.row time{font-family:var(--mono);font-size:.95rem;color:var(--maroon)}
+.row .what{font-size:1.05rem;color:var(--ink)}
+.row--payoff{background:var(--navy);margin:10px -22px -8px;padding:18px 24px;border-bottom:none}
+.row--payoff time{color:#fff}
+.row--payoff .what{font-family:var(--display);text-transform:uppercase;font-size:1.35rem;font-weight:700;color:var(--amber)}
+
+/* ── Pitch strip ────────────────────── */
+.pitch{padding:72px 0;background:var(--paper)}
+.pitch h2{font-size:clamp(2rem,5vw,3rem);margin:12px 0 18px;color:var(--navy)}
+.pitch p{max-width:62ch;color:var(--ink-soft);font-size:1.1rem}
+.pitch p+p{margin-top:14px}
+.pitch strong{color:var(--ink)}
+
+/* ── Services ladder ────────────────── */
+.services{padding:72px 0;background:#F1F0EB;border-top:1px solid var(--line)}
+.services h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 8px}
+.services .sub{color:var(--ink-soft);max-width:58ch;margin-bottom:40px}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.tier{background:#fff;border:1px solid var(--line);padding:30px 26px;display:flex;flex-direction:column}
+.tier--flag{border:2px solid var(--maroon)}
+.tier h3{font-size:1.6rem;color:var(--navy)}
+.price{font-family:var(--display);font-weight:800;font-size:2.6rem;color:var(--maroon);margin:8px 0 2px}
+.price small{font-size:1rem;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
+.tier .badge{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--maroon);align-self:flex-start;padding:4px 10px;margin-bottom:14px}
+.tier .badge--soon{background:var(--navy)}
+.tier p{color:var(--ink-soft);font-size:.98rem;margin:12px 0 18px}
+.tier ul{list-style:none;margin:0 0 22px}
+.tier li{padding:7px 0 7px 26px;position:relative;font-size:.95rem;border-bottom:1px dashed var(--line)}
+.tier li::before{content:"";position:absolute;left:2px;top:14px;width:12px;height:12px;background:var(--amber);clip-path:polygon(0 0,100% 50%,0 100%)}
+.tier .btn{margin-top:auto;text-align:center}
+.foundnote{font-family:var(--mono);font-size:.8rem;color:var(--maroon);margin-top:12px}
+
+/* ── About ──────────────────────────── */
+.about{padding:72px 0;background:var(--paper)}
+.about .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start}
+.about h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 18px}
+.about p{color:var(--ink-soft);margin-bottom:14px}
+.about strong{color:var(--ink)}
+.statcard{background:var(--navy);color:#fff;padding:30px 26px}
+.statcard dl{display:grid;gap:18px}
+.statcard dt{font-family:var(--mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.statcard dd{font-family:var(--display);font-size:2rem;font-weight:800;text-transform:uppercase;line-height:1.05}
+@media(max-width:820px){.about .grid{grid-template-columns:1fr}}
+
+/* ── Testimonials ───────────────────── */
+.quotes{padding:72px 0;background:#F1F0EB;border-top:1px solid var(--line)}
+.quotes h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 34px}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+blockquote{background:#fff;border-left:4px solid var(--maroon);padding:26px 24px;font-size:1rem;color:var(--ink-soft)}
+blockquote footer{margin-top:14px;font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--ink)}
+
+/* ── Contact ────────────────────────── */
+.contact{background:var(--navy);color:#fff;padding:80px 0;text-align:left}
+.contact h2{font-size:clamp(2.2rem,6vw,3.6rem);margin:12px 0 18px}
+.contact h2 em{font-style:normal;color:var(--amber)}
+.contact p{color:#C6D1DD;max-width:54ch;margin-bottom:30px;font-size:1.1rem}
+.contact .ctas{display:flex;gap:14px;flex-wrap:wrap}
+footer.site{background:#0A1420;color:#7E8FA3;padding:26px 0;font-size:.85rem}
+footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top">Prompt<span>Workx</span></a>
+    <nav aria-label="Main">
+      <a href="#services">Services</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">AI Workflow Consulting · Brisbane</p>
+      <h1>A six-week campaign. Finished in <em>13 hours.</em></h1>
+      <p class="lede">This July I took a song from a 3.30am idea to live on Spotify, YouTube, Instagram, TikTok and Facebook by 5pm the same day — with 1,000 print-ready flyers designed, QR-verified and queued for the press. No agency. No label. An orchestrated AI system, with me conducting. I point that same system at businesses.</p>
+      <div class="ctas">
+        <a class="btn btn--primary" href="#services">Book an AI Power Hour — $100</a>
+        <a class="btn btn--outline" href="#runsheet">See the run sheet</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="runsheet" id="runsheet">
+    <div class="wrap">
+      <p class="eyebrow">The receipt · Tuesday, July 2026</p>
+      <p>One day, timestamped. Every line below is verifiable — the song is live, the flyers were handed out at State of Origin III the next night.</p>
+      <div class="sheet">
+        <div class="row"><time>3:30 AM</time><div class="what">Woke with the chorus finally set — verses written before getting out of bed</div></div>
+        <div class="row"><time>4:30 AM</time><div class="what">Mixing begins — sixteen versions in the bin before it clicked</div></div>
+        <div class="row"><time>7:00 AM</time><div class="what">Song finished</div></div>
+        <div class="row"><time>8:00 AM</time><div class="what">First audience reactions from strangers at a local café — verdict: keep going</div></div>
+        <div class="row"><time>MORNING</time><div class="what">Track cleaned in Audacity, distributed via DistroKid — live on Spotify in under two hours</div></div>
+        <div class="row"><time>AFTERNOON</time><div class="what">Lyric video published on YouTube; shorts cut for Facebook, Instagram and TikTok</div></div>
+        <div class="row"><time>AFTERNOON</time><div class="what">1,000-flyer print file designed by AI in minutes — QR codes generated and verified</div></div>
+        <div class="row"><time>5:00 PM</time><div class="what">Campaign complete — thirteen and a half hours after the idea arrived</div></div>
+        <div class="row"><time>NEXT 7AM</time><div class="what">1,000 double-sided flyers off the press</div></div>
+        <div class="row"><time>NEXT 9AM</time><div class="what">First flyers in strangers' hands</div></div>
+        <div class="row row--payoff"><time>THAT NIGHT</time><div class="what">300 flyers handed out as 52,000 marched to State of Origin III — with chorus chants led at the local pub</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pitch">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--dark">The point</p>
+      <h2>The song was never the point. The system was.</h2>
+      <p>The system doesn't care whether it's making music, quotes, reports, proposals, marketing content or client follow-ups. <strong>It collapses timelines wherever it's pointed.</strong></p>
+      <p>Most businesses don't have an AI problem — they have an AI <strong>chaos</strong> problem. Staff already using it, untrained, on your time. Hours lost wrestling the wrong tool into the wrong job. Opportunities sitting untouched because nobody's shown you what's actually possible.</p>
+      <p>I fix that with a consultant's hat on: no jargon, no 12-month digital transformation roadmap, no software to buy. Real tasks from your real business, made faster in front of you.</p>
+    </div>
+  </section>
+
+  <section class="services" id="services">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--dark">Services</p>
+      <h2>Three ways in</h2>
+      <p class="sub">Start small. Every service is built on the same principle: your tasks, your business, demonstrated live — never a canned demo.</p>
+      <div class="tiers">
+
+        <article class="tier tier--flag">
+          <span class="badge">Start here</span>
+          <h3>AI Power Hour</h3>
+          <p class="price">$100</p>
+          <p>60 minutes, Zoom, Teams or in person (Brisbane). We find the three biggest time-eaters in your week — and I live-demo AI collapsing one of them in front of you.</p>
+          <ul>
+            <li>Your task, your business, live on screen</li>
+            <li>One-page playbook you can use that afternoon</li>
+            <li>No jargon, no homework, no software to buy</li>
+          </ul>
+          <a class="btn btn--primary" href="#contact">Book a Power Hour</a>
+          <p class="foundnote">Founding client offer: first 5 bookings $50 — half price.</p>
+        </article>
+
+        <article class="tier">
+          <span class="badge badge--soon">Launching August</span>
+          <h3>Custom AI Use Protocol</h3>
+          <p class="price">$900</p>
+          <p>Your staff are already using AI — the question is how. I review actual practices across your team, then deliver a custom protocol: the do's, the don'ts, the no-go zones, and the opportunities you're leaving on the table.</p>
+          <ul>
+            <li>Staff practice review — what's really happening</li>
+            <li>Written protocol: safe use, data rules, no-go zones</li>
+            <li>The missed-opportunity list that pays for the document</li>
+            <li>One-hour briefing to land it with your team</li>
+          </ul>
+          <a class="btn btn--dark" href="#contact">Register interest</a>
+        </article>
+
+        <article class="tier">
+          <h3>AI Opportunity Audit</h3>
+          <p class="price">$1,500</p>
+          <p>The full sweep. I map your workflows end to end, identify where AI genuinely earns its keep in your business — and where it doesn't — and hand you a prioritised, plain-English action plan.</p>
+          <ul>
+            <li>End-to-end workflow review</li>
+            <li>Prioritised opportunities, ranked by payoff</li>
+            <li>Plain-English roadmap — yours to keep, no lock-in</li>
+          </ul>
+          <a class="btn btn--dark" href="#contact">Enquire about an audit</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="about">
+    <div class="wrap">
+      <div class="grid">
+        <div>
+          <p class="eyebrow eyebrow--dark">About</p>
+          <h2>Why listen to this bloke?</h2>
+          <p>I'm <strong>Chris Carroll</strong> — Brisbane-based founder, consultant and musician. PromptWorkx wasn't born in a strategy deck. It was born from <strong>2,500 hours and 20,000 prompts</strong> spent building a working app with no coding experience — learning, the hard way, exactly what AI can and can't do for someone with a real goal and no technical safety net.</p>
+          <p>That journey turned into a method. The method turned into results — like a full music release campaign, from dawn idea to every platform plus print, inside 13 hours.</p>
+          <p>I've spent my working life adopting each new wave of technology early and turning it into practical advantage. AI is the biggest wave yet, and most businesses are standing on the beach. My job is simple: show you, using your own work, what's now possible — then hand you the keys.</p>
+        </div>
+        <aside class="statcard" aria-label="Track record at a glance">
+          <dl>
+            <div><dt>Hands-on immersion</dt><dd>2,500 hours · 20,000 prompts</dd></div>
+            <div><dt>Proof of method</dt><dd>13-hour full release campaign</dd></div>
+            <div><dt>Approach</dt><dd>Consultant's hat. No lock-in.</dd></div>
+            <div><dt>Base</dt><dd>Brisbane, QLD</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="quotes">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--dark">In their words</p>
+      <h2>What people say</h2>
+      <div class="qgrid">
+        <blockquote>
+          <p>[PASTE MARCO'S TESTIMONIAL FROM THE CURRENT FRAMER SITE — EXACT WORDING]</p>
+          <footer>— Marco</footer>
+        </blockquote>
+        <blockquote>
+          <p>[PASTE KAREN'S TESTIMONIAL FROM THE CURRENT FRAMER SITE — EXACT WORDING]</p>
+          <footer>— Karen</footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <p class="eyebrow">Contact</p>
+      <h2>One hour. <em>Real results.</em></h2>
+      <p>Message me on LinkedIn with the word <strong>HOUR</strong> and we'll lock in a time — or send an email. Founding client pricing applies to the first five Power Hour bookings.</p>
+      <div class="ctas">
+        <a class="btn btn--primary" href="https://www.linkedin.com/in/chris-carroll-610376277/" rel="noopener">DM me on LinkedIn</a>
+        <a class="btn btn--ghost" href="mailto:UPDATE-ME@promptworkx.com">Email PromptWorkx</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>© 2026 PromptWorkx · Brisbane, Australia</span>
+    <span>Practical AI for Real Business Results</span>
+  </div>
+</footer>
+
+</body>
+</html>
