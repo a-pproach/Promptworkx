@@ -230,12 +230,11 @@ h1,h2,h3{font-family:var(--display);line-height:1.02;text-transform:uppercase;le
 .btn--dark:hover{background:var(--navy-2)}
 
 /* ── Header ─────────────────────────── */
-header{background:var(--navy);color:#fff;padding:20px 0;border-bottom:1px solid var(--line-dark)}
-header .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.logo{font-family:var(--display);font-weight:800;font-size:1.5rem;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-decoration:none}
-.logo span{color:var(--amber)}
-nav a{color:#fff;text-decoration:none;font-size:.95rem;font-weight:500;margin-left:22px}
-nav a:hover{color:var(--amber)}
+header{background:var(--paper);padding:0;border-bottom:1px solid var(--line)}
+.logo-banner{display:block;width:100%;height:auto}
+header nav{display:flex;justify-content:center;gap:32px;padding:16px 0;border-top:1px solid var(--line)}
+header nav a{color:var(--navy);text-decoration:none;font-size:.95rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-family:var(--display)}
+header nav a:hover{color:var(--maroon)}
 
 /* ── Hero ───────────────────────────── */
 .hero{background:var(--paper);color:var(--ink);padding:88px 0 56px;border-bottom:1px solid var(--line)}
@@ -351,14 +350,12 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 <body>
 
 <header>
-  <div class="wrap">
-    <a class="logo" href="#top">Prompt<span>Workx</span></a>
-    <nav aria-label="Main">
-      <a href="#services">Services</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </div>
+  <a href="#top"><img class="logo-banner" src="logo.gif.gif" alt="PromptWorkx"></a>
+  <nav aria-label="Main">
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
 </header>
 
 <main id="top">
@@ -557,8 +554,8 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   <section class="contact" id="contact">
     <div class="wrap">
       <p class="eyebrow">Contact</p>
-      <h2>One hour. <em>Real results.</em></h2>
-      <p>Message me on LinkedIn with the word <strong>HOUR</strong> and we'll lock in a time — or send an email. Founding client pricing applies to the first five Power Hour bookings.</p>
+      <h2>Fifteen minutes. <em>Real answers.</em></h2>
+      <p>Message me on LinkedIn with the word <strong>AUDIT</strong> and we'll lock in a time — or send an email.</p>
       <div class="ctas">
         <a class="btn btn--primary" href="https://www.linkedin.com/in/chris-carroll-610376277/" rel="noopener">DM me on LinkedIn</a>
         <a class="btn btn--ghost" href="mailto:chris@promptworkx.com">Email PromptWorkx</a>
