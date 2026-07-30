@@ -34,7 +34,19 @@
       "priceRange": "$300-$2000+",
       "sameAs": [
         "https://www.linkedin.com/in/chris-carroll-610376277/"
-      ]
+      ],
+      "potentialAction": {
+        "@type": "InteractAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://promptworkx.com/#ask-panel",
+          "actionPlatform": [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/MobileWebPlatform"
+          ]
+        },
+        "description": "Ask PromptWorkx directly — a live, grounded AI interface answering questions about AI visibility, GEO, and PromptWorkx's services in real time."
+      }
     },
     {
       "@type": "Person",
@@ -205,6 +217,8 @@
   --maroon:#7E1F32;
   --maroon-deep:#5E1625;
   --amber:#E8A13D;
+  --logo-blue:#005FAE;
+  --logo-blue-deep:#00457F;
   --line:#DCE0E4;
   --line-dark:rgba(255,255,255,.14);
   --display:'Barlow Condensed',sans-serif;
@@ -235,6 +249,31 @@ header{background:var(--paper);padding:0;border-bottom:1px solid var(--line)}
 header nav{display:flex;justify-content:center;gap:32px;padding:16px 0;border-top:1px solid var(--line)}
 header nav a{color:var(--navy);text-decoration:none;font-size:.95rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-family:var(--display)}
 header nav a:hover{color:var(--maroon)}
+
+/* ── Ask PromptWorkx panel ──────────── */
+.ask-panel{padding:10px 0 0;background:var(--paper)}
+.ask-box{background:#fff;border:1px solid var(--line);max-width:640px;margin:0 auto;box-shadow:0 2px 0 rgba(29,42,58,.05);border-radius:28px;transition:border-radius .2s}
+.ask-box.expanded{border-radius:20px}
+.ask-input-row{position:relative;display:flex;align-items:flex-end;gap:8px;padding:16px 20px}
+.ask-input-row textarea{flex:1;border:none;outline:none;font-family:var(--body);font-size:1.05rem;color:var(--ink);background:transparent;position:relative;z-index:2;resize:none;max-height:6.6em;line-height:1.5;padding:8px 0;overflow-y:auto}
+.ask-fake-placeholder{position:absolute;left:20px;top:50%;transform:translateY(-50%);font-family:var(--body);font-size:1.05rem;color:var(--ink-soft);pointer-events:none;transition:opacity .6s ease;z-index:1;max-width:calc(100% - 120px);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ask-fake-placeholder.fade{opacity:0}
+.ask-mic{background:none;border:none;color:var(--ink-soft);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;z-index:2;transition:background .15s,color .15s}
+.ask-mic:hover{background:var(--paper);color:var(--navy)}
+.ask-mic svg{width:19px;height:19px}
+.ask-mic.listening{color:var(--logo-blue)}
+.ask-send{background:var(--logo-blue);color:#fff;border:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;z-index:2;transition:background .15s}
+.ask-send:hover{background:var(--logo-blue-deep)}
+.ask-send svg{width:18px;height:18px}
+.ask-thread{display:none;border-top:1px solid var(--line);padding:18px 20px;max-height:320px;overflow-y:auto}
+.ask-thread.active{display:block}
+.ask-msg{margin-bottom:16px;font-size:.98rem;line-height:1.55}
+.ask-msg .who{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+.ask-msg.visitor .who{color:var(--navy)}
+.ask-msg.visitor p{color:var(--ink);font-weight:600}
+.ask-msg.ai .who{color:var(--maroon)}
+.ask-msg.ai p{color:var(--ink-soft)}
+.ask-thinking{font-family:var(--mono);font-size:.78rem;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
 
 /* ── Hero ───────────────────────────── */
 .hero{background:var(--paper);color:var(--ink);padding:88px 0 56px;border-bottom:1px solid var(--line)}
@@ -359,6 +398,20 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 </header>
 
 <main id="top">
+
+  <section class="ask-panel" id="ask-panel">
+    <div class="wrap">
+      <div class="ask-box">
+        <div class="ask-input-row">
+          <span class="ask-fake-placeholder" id="askPlaceholder">Ask PromptWorkx AI</span>
+          <textarea id="askInput" aria-label="Ask PromptWorkx" rows="1"></textarea>
+          <button class="ask-mic" id="askMic" aria-label="Ask by voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg></button>
+          <button class="ask-send" id="askSend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="6 11 12 5 18 11"></polyline></svg></button>
+        </div>
+        <div class="ask-thread" id="askThread"></div>
+      </div>
+    </div>
+  </section>
 
   <section class="hero">
     <div class="wrap">
@@ -572,5 +625,126 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   </div>
 </footer>
 
+<script>
+// Ask PromptWorkx — live panel, wired to the Cloudflare Worker.
+(function(){
+  const prompts = [
+    "Ask PromptWorkx AI",
+    "Am I visible to ChatGPT?",
+    "What's the difference between SEO and GEO?",
+    "Does Google AI know who I am?",
+    "Why did a competitor show up instead of me?"
+  ];
+  let i = 0;
+  const ph = document.getElementById('askPlaceholder');
+  const input = document.getElementById('askInput');
+  const thread = document.getElementById('askThread');
+  let rotateFadeTimeout = null;
+  let rotateTimer = setInterval(function(){
+    ph.classList.add('fade');
+    rotateFadeTimeout = setTimeout(function(){
+      i = (i + 1) % prompts.length;
+      ph.textContent = prompts[i];
+      ph.classList.remove('fade');
+    }, 600);
+  }, 8000);
+
+  function pauseRotation(){
+    ph.classList.add('fade');
+  }
+  function autoGrow(){
+    input.style.height = 'auto';
+    input.style.height = input.scrollHeight + 'px';
+  }
+  input.addEventListener('input', function(){
+    ph.classList.toggle('fade', input.value.length > 0);
+    autoGrow();
+  });
+
+  const WORKER_URL = 'https://ask-promptworkx.chriscarroll-promptworkx.workers.dev';
+  const sessionId = 'web-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const conversationHistory = [];
+
+  function send(){
+    const q = input.value.trim();
+    if(!q) return;
+    pauseRotation();
+    thread.classList.add('active');
+    document.querySelector('.ask-box').classList.add('expanded');
+    const v = document.createElement('div');
+    v.className = 'ask-msg visitor';
+    v.innerHTML = '<span class="who">You</span><p></p>';
+    v.querySelector('p').textContent = q;
+    thread.appendChild(v);
+    input.value = '';
+    input.style.height = 'auto';
+    clearInterval(rotateTimer);
+    clearTimeout(rotateFadeTimeout);
+    ph.textContent = 'Ask another question, or get PromptWorkx to contact you';
+    ph.classList.remove('fade');
+
+    conversationHistory.push({ role: 'user', content: q });
+
+    const thinking = document.createElement('p');
+    thinking.className = 'ask-thinking';
+    thinking.textContent = 'PromptWorkx is thinking…';
+    thread.appendChild(thinking);
+    thread.scrollTop = thread.scrollHeight;
+
+    fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sessionId: sessionId, messages: conversationHistory })
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        thinking.remove();
+        const replyText = data.reply || "Something went wrong on my end — try again in a moment.";
+        conversationHistory.push({ role: 'assistant', content: replyText });
+        const a = document.createElement('div');
+        a.className = 'ask-msg ai';
+        a.innerHTML = '<span class="who">PromptWorkx</span><p></p>';
+        a.querySelector('p').textContent = replyText;
+        thread.appendChild(a);
+        thread.scrollTop = thread.scrollHeight;
+      })
+      .catch(function(){
+        thinking.remove();
+        const a = document.createElement('div');
+        a.className = 'ask-msg ai';
+        a.innerHTML = '<span class="who">PromptWorkx</span><p></p>';
+        a.querySelector('p').textContent = "That's taking longer than it should — try again, or jump straight to a door below.";
+        thread.appendChild(a);
+        thread.scrollTop = thread.scrollHeight;
+      });
+  }
+
+  document.getElementById('askSend').addEventListener('click', send);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+
+  // Voice input — browser-native Speech-to-Text, free, client-side.
+  // Not supported in every browser (Chrome/Edge: yes. Firefox/some mobile: patchy) — fails silently to typing.
+  const micBtn = document.getElementById('askMic');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(SR){
+    const recognition = new SR();
+    recognition.lang = 'en-AU';
+    recognition.interimResults = false;
+    micBtn.addEventListener('click', function(){
+      pauseRotation();
+      micBtn.classList.add('listening');
+      recognition.start();
+    });
+    recognition.onresult = function(e){
+      input.value = e.results[0][0].transcript;
+      micBtn.classList.remove('listening');
+    };
+    recognition.onerror = function(){ micBtn.classList.remove('listening'); };
+    recognition.onend = function(){ micBtn.classList.remove('listening'); };
+  } else {
+    micBtn.style.display = 'none'; // graceful fallback — just type instead
+  }
+})();
+</script>
 </body>
 </html>
