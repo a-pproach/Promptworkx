@@ -228,7 +228,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
-body{font-family:var(--body);color:var(--ink);background:var(--paper);line-height:1.6;font-size:17px}
+body{font-family:var(--body);color:var(--ink);background:var(--paper);line-height:1.6;font-size:17px;overflow-anchor:none}
 a{color:var(--maroon)}
 a:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -245,10 +245,22 @@ h1,h2,h3{font-family:var(--display);line-height:1.02;text-transform:uppercase;le
 
 /* ── Header ─────────────────────────── */
 header{background:var(--paper);padding:16px 0 0;border-bottom:1px solid var(--line);text-align:center}
-.logo-banner{display:block;width:clamp(300px, 22vw, 520px);height:auto;margin:0 auto}
+.logo-banner{display:block;width:280px;aspect-ratio:4.706/1;height:auto;margin:0 auto}
+@media (min-width: 600px){ .logo-banner{width:360px} }
+@media (min-width: 1024px){ .logo-banner{width:480px} }
+@media (min-width: 1600px){ .logo-banner{width:640px} }
+@media (min-width: 2200px){ .logo-banner{width:800px} }
 header nav{display:flex;justify-content:center;gap:32px;padding:16px 0;border-top:1px solid var(--line)}
 header nav a{color:var(--navy);text-decoration:none;font-size:.95rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-family:var(--display)}
 header nav a:hover{color:var(--maroon)}
+header nav a.nav-buy{
+  background:var(--amber);
+  color:var(--navy);
+  padding:6px 16px;
+  border-radius:999px;
+  font-weight:700;
+}
+header nav a.nav-buy:hover{background:#d99323;color:var(--navy)}
 
 /* ── Ask PromptWorkx panel ──────────── */
 .ask-panel{padding:10px 0 0;background:var(--paper)}
@@ -269,6 +281,7 @@ header nav a:hover{color:var(--maroon)}
 .ask-thread.active{display:block}
 .ask-msg{margin-bottom:16px;font-size:.98rem;line-height:1.55}
 .ask-msg .who{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+.ask-msg p{white-space:pre-line}
 .ask-msg.visitor .who{color:var(--navy)}
 .ask-msg.visitor p{color:var(--ink);font-weight:600}
 .ask-msg.ai .who{color:var(--maroon)}
@@ -277,7 +290,11 @@ header nav a:hover{color:var(--maroon)}
 .ask-sysnote{text-align:center;font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:6px 0 14px;opacity:.85}
 
 /* ── Hero ───────────────────────────── */
-.hero{background:var(--paper);color:var(--ink);padding:88px 0 56px;border-bottom:1px solid var(--line)}
+@media (min-width: 1024px){
+  .hero .wrap,
+  .proof .wrap{padding-left:180px}
+}
+.hero{background:var(--paper);color:var(--ink);padding:28px 0 56px;border-bottom:1px solid var(--line)}
 .hero .eyebrow{color:var(--maroon)}
 .hero h1{font-size:clamp(3rem,8vw,5.6rem);font-weight:800;margin:14px 0 22px;max-width:18ch;color:var(--navy)}
 .hero h1 em{font-style:normal;color:var(--maroon)}
@@ -390,12 +407,16 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 <body>
 
 <header>
-  <a href="#top"><img class="logo-banner" src="logo.gif.gif" alt="PromptWorkx"></a>
-  <nav aria-label="Main">
-    <a href="#" data-nav-intent="services">Services</a>
-    <a href="#" data-nav-intent="about">About</a>
-    <a href="#" data-nav-intent="contact">Contact</a>
-  </nav>
+  <div class="wrap">
+    <a href="#top"><img class="logo-banner" src="logo.gif.gif" alt="PromptWorkx" width="480" height="102"></a>
+    <nav aria-label="Main">
+      <a href="#" data-nav-intent="services">Services</a>
+      <a href="#" data-nav-intent="about">About</a>
+      <a href="#" data-nav-intent="contact">Contact</a>
+      <a href="/ai-tips">AI Tips</a>
+      <a href="/liveask" class="nav-buy">Buy LiveAsk</a>
+    </nav>
+  </div>
 </header>
 
 <main id="top">
@@ -744,21 +765,22 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   input.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
 
   // ---- Legacy nav items ("Services", "About", "Contact") now trigger the
-  // panel directly instead of scrolling to a static section. Each click is
-  // acknowledged honestly as a system note — never rendered as if the
-  // visitor typed the underlying prompt themselves.
+  // panel with FIXED, locked text — no AI interpretation of the opener at
+  // all. These are consistent, agreed messages (see liveask scripting docs,
+  // 31 July) — the model only takes over from the visitor's next reply
+  // onward, using the normal tested flow (contact-capture, door ID, etc).
   const NAV_INTENTS = {
     services: {
       note: '→ You clicked Services',
-      prompt: 'What services do you offer?'
+      reply: "Our core services are:\n\nAI Visibility Audit — $300 · See what AI currently says about your business\nAI Visibility Build — from $2,000 · Structural work so AI finds and recommends you\nCustom AI Use Protocol — $900 · Safe AI practices and data rules for your team\nAI Opportunity Audit — $1,500 · Full workflow review with a prioritised action plan\n\nWhich one's closest to what you need?"
     },
     about: {
       note: '→ You clicked About',
-      prompt: 'What do you do?'
+      reply: "PromptWorkx tackles the real AI issues businesses actually face — not just theory.\n\nWe help you get found and recommended by AI (ChatGPT, Google AI, Gemini, Claude, Perplexity, not just Google search), and now you can put LiveAsk on your own site to convert that traffic into real leads.\n\nWe also help with AI use policy and adoption strategy — and our AI Tips page has more on what's genuinely worth your time.\n\nWhat's most relevant to you right now?"
     },
     contact: {
       note: '→ You clicked Contact',
-      prompt: "I'd like PromptWorkx to contact me."
+      reply: "Thank you for requesting contact from us.\nMay we start with your name please?"
     }
   };
   document.querySelectorAll('[data-nav-intent]').forEach(function(el){
@@ -767,7 +789,30 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       const cfg = NAV_INTENTS[el.getAttribute('data-nav-intent')];
       if(!cfg) return;
       document.getElementById('ask-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      submitToPanel(cfg.prompt, { showVisitorBubble: false, systemNote: cfg.note });
+      pauseRotation();
+      thread.classList.add('active');
+      document.querySelector('.ask-box').classList.add('expanded');
+
+      const note = document.createElement('div');
+      note.className = 'ask-sysnote';
+      note.textContent = cfg.note;
+      thread.appendChild(note);
+
+      const a = document.createElement('div');
+      a.className = 'ask-msg ai';
+      a.innerHTML = '<span class="who">PromptWorkx</span><p></p>';
+      a.querySelector('p').textContent = cfg.reply;
+      thread.appendChild(a);
+      thread.scrollTop = thread.scrollHeight;
+
+      // Fed into history as an assistant turn so the visitor's next reply
+      // (e.g. giving their name after Contact) continues naturally through
+      // the normal, already-tested flow — no separate Claude call for
+      // this fixed opener itself, no cost, no drift, no AI improvisation.
+      conversationHistory.push({ role: 'assistant', content: cfg.reply });
+
+      ph.textContent = 'Ask another question, or get PromptWorkx to contact you';
+      ph.classList.remove('fade');
     });
   });
 
