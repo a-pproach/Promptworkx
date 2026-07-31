@@ -244,8 +244,8 @@ h1,h2,h3{font-family:var(--display);line-height:1.02;text-transform:uppercase;le
 .btn--dark:hover{background:var(--navy-2)}
 
 /* ── Header ─────────────────────────── */
-header{background:var(--paper);padding:0;border-bottom:1px solid var(--line)}
-.logo-banner{display:block;width:100%;height:auto}
+header{background:var(--paper);padding:16px 0 0;border-bottom:1px solid var(--line);text-align:center}
+.logo-banner{display:block;width:clamp(300px, 22vw, 520px);height:auto;margin:0 auto}
 header nav{display:flex;justify-content:center;gap:32px;padding:16px 0;border-top:1px solid var(--line)}
 header nav a{color:var(--navy);text-decoration:none;font-size:.95rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-family:var(--display)}
 header nav a:hover{color:var(--maroon)}
@@ -274,6 +274,7 @@ header nav a:hover{color:var(--maroon)}
 .ask-msg.ai .who{color:var(--maroon)}
 .ask-msg.ai p{color:var(--ink-soft)}
 .ask-thinking{font-family:var(--mono);font-size:.78rem;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
+.ask-sysnote{text-align:center;font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:6px 0 14px;opacity:.85}
 
 /* ── Hero ───────────────────────────── */
 .hero{background:var(--paper);color:var(--ink);padding:88px 0 56px;border-bottom:1px solid var(--line)}
@@ -391,9 +392,9 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 <header>
   <a href="#top"><img class="logo-banner" src="logo.gif.gif" alt="PromptWorkx"></a>
   <nav aria-label="Main">
-    <a href="#services">Services</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
+    <a href="#" data-nav-intent="services">Services</a>
+    <a href="#" data-nav-intent="about">About</a>
+    <a href="#" data-nav-intent="contact">Contact</a>
   </nav>
 </header>
 
@@ -665,25 +666,37 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   const sessionId = 'web-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
   const conversationHistory = [];
 
-  function send(){
-    const q = input.value.trim();
-    if(!q) return;
+  // Shared core — both manual typing and nav-triggered prompts flow through
+  // this single, already-tested path. `showVisitorBubble` controls whether
+  // the actual prompt text renders as a "You" bubble (real typed messages)
+  // or stays invisible behind a plain system note (nav clicks) — a nav click
+  // should never look like the visitor typed words they didn't type.
+  function submitToPanel(promptText, opts){
+    opts = opts || {};
     pauseRotation();
     thread.classList.add('active');
     document.querySelector('.ask-box').classList.add('expanded');
-    const v = document.createElement('div');
-    v.className = 'ask-msg visitor';
-    v.innerHTML = '<span class="who">You</span><p></p>';
-    v.querySelector('p').textContent = q;
-    thread.appendChild(v);
-    input.value = '';
-    input.style.height = 'auto';
+
+    if(opts.systemNote){
+      const note = document.createElement('div');
+      note.className = 'ask-sysnote';
+      note.textContent = opts.systemNote;
+      thread.appendChild(note);
+    }
+    if(opts.showVisitorBubble !== false){
+      const v = document.createElement('div');
+      v.className = 'ask-msg visitor';
+      v.innerHTML = '<span class="who">You</span><p></p>';
+      v.querySelector('p').textContent = promptText;
+      thread.appendChild(v);
+    }
+
     clearInterval(rotateTimer);
     clearTimeout(rotateFadeTimeout);
     ph.textContent = 'Ask another question, or get PromptWorkx to contact you';
     ph.classList.remove('fade');
 
-    conversationHistory.push({ role: 'user', content: q });
+    conversationHistory.push({ role: 'user', content: promptText });
 
     const thinking = document.createElement('p');
     thinking.className = 'ask-thinking';
@@ -719,8 +732,44 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       });
   }
 
+  function send(){
+    const q = input.value.trim();
+    if(!q) return;
+    input.value = '';
+    input.style.height = 'auto';
+    submitToPanel(q, { showVisitorBubble: true });
+  }
+
   document.getElementById('askSend').addEventListener('click', send);
   input.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+
+  // ---- Legacy nav items ("Services", "About", "Contact") now trigger the
+  // panel directly instead of scrolling to a static section. Each click is
+  // acknowledged honestly as a system note — never rendered as if the
+  // visitor typed the underlying prompt themselves.
+  const NAV_INTENTS = {
+    services: {
+      note: '→ You clicked Services',
+      prompt: 'What services do you offer?'
+    },
+    about: {
+      note: '→ You clicked About',
+      prompt: 'What do you do?'
+    },
+    contact: {
+      note: '→ You clicked Contact',
+      prompt: "I'd like PromptWorkx to contact me."
+    }
+  };
+  document.querySelectorAll('[data-nav-intent]').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      const cfg = NAV_INTENTS[el.getAttribute('data-nav-intent')];
+      if(!cfg) return;
+      document.getElementById('ask-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      submitToPanel(cfg.prompt, { showVisitorBubble: false, systemNote: cfg.note });
+    });
+  });
 
   // Voice input — browser-native Speech-to-Text, free, client-side.
   // Not supported in every browser (Chrome/Edge: yes. Firefox/some mobile: patchy) — fails silently to typing.
