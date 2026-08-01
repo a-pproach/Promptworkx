@@ -250,7 +250,7 @@ header{background:var(--paper);padding:16px 0 0;border-bottom:1px solid var(--li
 @media (min-width: 1024px){ .logo-banner{width:480px} }
 @media (min-width: 1600px){ .logo-banner{width:640px} }
 @media (min-width: 2200px){ .logo-banner{width:800px} }
-header nav{display:flex;justify-content:center;gap:32px;padding:16px 0;border-top:1px solid var(--line)}
+header nav{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 32px;padding:16px 0;border-top:1px solid var(--line)}
 header nav a{color:var(--navy);text-decoration:none;font-size:.95rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-family:var(--display)}
 header nav a:hover{color:var(--maroon)}
 header nav a.nav-buy{
@@ -407,7 +407,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 
 <header>
   <div class="wrap">
-    <a href="/"><img class="logo-banner" src="logo.gif.gif" alt="PromptWorkx" width="480" height="102"></a>
+    <a href="/"><img class="logo-banner" src="/logo.gif.gif" alt="PromptWorkx" width="480" height="102"></a>
     <nav aria-label="Main">
       <a href="/">Home</a>
       <a href="#" data-nav-intent="services">Services</a>
