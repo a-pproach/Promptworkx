@@ -441,7 +441,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       <h1>Your customers are asking AI who to use. <em>Are they seeing your&nbsp;name?</em></h1>
       <p class="lede">Google AI, ChatGPT, Gemini, Claude and Perplexity now answer that question directly — often before anyone clicks a website. Most businesses have no idea what those systems say about them, whether they're recommended at all, or who's getting the enquiry instead. I show you, live, in fifteen minutes.</p>
       <div class="ctas">
-        <a class="btn btn--primary" href="#services">Book an AI Visibility Audit — $300</a>
+        <a class="btn btn--primary" href="#visibility-audit-card">What is our AI Visibility Audit?</a>
         <a class="btn btn--outline" href="#proof">See what happened to my own business</a>
       </div>
     </div>
@@ -476,7 +476,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       <p class="sub">Three genuinely different problems. Each one stands on its own — you don't need to care about the other two to get real value from any single one.</p>
       <div class="doors">
 
-        <article class="door door--flag">
+        <article class="door door--flag" id="visibility-audit-card">
           <p class="worry">"Can customers find us when they ask AI?"</p>
           <h3>AI Visibility</h3>
           <p>The problem this page opened with. Most businesses have never checked what AI systems say about them — or who's being recommended instead. Two steps, in sequence.</p>
@@ -485,13 +485,13 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
               <p class="stepname">Step one</p>
               <h4>Visibility Audit — $300</h4>
               <p>I run the exact questions your customers are already asking AI — live, on screen, in front of you. You see precisely what's said, who's recommended instead of you, and what's fixable.</p>
-              <a class="btn btn--primary" href="#contact">Book an Audit</a>
+              <a class="btn btn--primary" href="#" data-nav-intent="book-audit">Book an Audit</a>
             </div>
             <div class="step">
               <p class="stepname">Step two</p>
               <h4>Visibility Build — from $2,000</h4>
               <p>Once we know what's broken, I fix it — the structural work that helps AI systems find, understand and correctly recommend your business, plus ongoing management as the landscape shifts.</p>
-              <a class="btn btn--outline" href="#contact">Enquire</a>
+              <a class="btn btn--outline" href="#" data-nav-intent="enquire-build">Enquire</a>
             </div>
           </div>
         </article>
@@ -506,7 +506,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <li>Written protocol: safe use, data rules, no-go zones</li>
             <li>One-hour briefing to land it with your team</li>
           </ul>
-          <a class="btn btn--dark" href="#contact">Register interest</a>
+          <a class="btn btn--dark" href="#" data-nav-intent="register-protocol">Register interest</a>
         </article>
 
         <article class="door door--secondary">
@@ -519,7 +519,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <li>Prioritised opportunities, ranked by payoff</li>
             <li>Plain-English roadmap — yours to keep, no lock-in</li>
           </ul>
-          <a class="btn btn--dark" href="#contact">Enquire about an audit</a>
+          <a class="btn btn--dark" href="#" data-nav-intent="enquire-opportunity">Enquire about an audit</a>
         </article>
 
       </div>
@@ -781,6 +781,22 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     contact: {
       note: '→ You clicked Contact',
       reply: "Thank you for requesting contact from us.\nMay we start with your name please?"
+    },
+    'book-audit': {
+      note: '→ You clicked Book an Audit',
+      reply: "I see you'd like to book an AI Visibility Audit.\nThank you for enquiring, may I have your name please?"
+    },
+    'enquire-build': {
+      note: '→ You clicked Enquire',
+      reply: "I see you're interested in an AI Visibility Build.\nThank you for enquiring, may I have your name please?"
+    },
+    'register-protocol': {
+      note: '→ You clicked Register interest',
+      reply: "I see you'd like to register interest in the Custom AI Use Protocol.\nThank you for enquiring, may I have your name please?"
+    },
+    'enquire-opportunity': {
+      note: '→ You clicked Enquire about an audit',
+      reply: "I see you're interested in the AI Opportunity Audit.\nThank you for enquiring, may I have your name please?"
     }
   };
   document.querySelectorAll('[data-nav-intent]').forEach(function(el){
