@@ -143,6 +143,14 @@
       "url": "https://promptworkx.com",
       "publisher": {
         "@id": "https://promptworkx.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://promptworkx.com/?q={search_term_string}#ask-panel"
+        },
+        "query-input": "required name=search_term_string"
       }
     },
     {
@@ -609,6 +617,17 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 
   document.getElementById('askSend').addEventListener('click', send);
   input.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+
+  // ---- SearchAction deep-link handler (see index.html for full comment) ----
+  (function handleSearchActionDeepLink(){
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if(!q) return;
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, '', cleanUrl);
+    document.getElementById('ask-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function(){ submitToPanel(q, { showVisitorBubble: true }); }, 400);
+  })();
 
   // ---- Legacy nav items ("Services", "About", "Contact") now trigger the
   // panel with FIXED, locked text — no AI interpretation of the opener at
