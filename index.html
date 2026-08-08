@@ -181,7 +181,7 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What actually happens in an AI Visibility Audit?",
+          "name": "What happens in a GenCheck session?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "I run the questions your customers are already asking — about your business, your trade, your area — live, in front of you, across the AI systems people actually use. You see exactly what's said, whether you're named at all, and who's being recommended instead. No slides, no theory — your real business, live on screen."
@@ -197,7 +197,7 @@
         },
         {
           "@type": "Question",
-          "name": "How is this different from SEO?",
+          "name": "How is GenSeen your GEO service different to SEO?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "SEO gets you ranked in a list of links. This is about something newer: when someone asks an AI system a question directly and it gives one answer, not ten — is your business the one it names? That's a different, growing part of how customers find businesses now, and most SEO work doesn't touch it at all."
@@ -213,7 +213,7 @@
         },
         {
           "@type": "Question",
-          "name": "What if the audit finds nothing wrong?",
+          "name": "What if GenCheck finds nothing wrong?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Then you'll know that for certain, instead of guessing — and that's genuinely useful too. I'm not going to manufacture a problem to sell you a fix. If your business is already well represented, I'll tell you so."
@@ -221,7 +221,7 @@
         },
         {
           "@type": "Question",
-          "name": "How quickly will this change what AI says about my business?",
+          "name": "How quickly will your GenGrid implementation take effect?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Some things move within weeks. Others — particularly showing up when someone asks a general question without naming your business — take longer and depend on building genuine, ongoing presence, not a single fix. I'll always tell you honestly which is which, rather than promising a timeline I can't back up."
@@ -236,7 +236,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Inter:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#0E1B2C;
@@ -249,10 +249,14 @@
   --amber:#E8A13D;
   --logo-blue:#005FAE;
   --logo-blue-deep:#00457F;
+  --charcoal:#222222;
+  --gencheck-tint:#B6647A;
+  --genguard-muted:#8F5A64;
   --line:#DCE0E4;
   --line-dark:rgba(255,255,255,.14);
   --display:'Barlow Condensed',sans-serif;
   --body:'Barlow',sans-serif;
+  --product-font:'Inter',sans-serif;
   --mono:'IBM Plex Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -266,7 +270,9 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offs
 .eyebrow--dark{color:var(--maroon)}
 h1,h2,h3{font-family:var(--display);line-height:1.02;text-transform:uppercase;letter-spacing:.01em}
 .btn{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;font-size:1.15rem;font-weight:700;text-decoration:none;padding:14px 28px;border:2px solid transparent}
+.btn--compact{font-size:.9rem;padding:9px 18px}
 .btn--primary{background:var(--maroon);color:#fff}
+.btn--liveask{background:var(--logo-blue);color:#fff}
 .btn--primary:hover{background:var(--maroon-deep)}
 .btn--ghost{border-color:var(--line-dark);color:#fff}
 .btn--ghost:hover{border-color:var(--amber);color:var(--amber)}
@@ -377,7 +383,7 @@ header nav a.nav-buy:hover img{opacity:.75}
 .door .worry{font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:6px}
 .door h3{font-size:1.7rem;color:var(--navy);margin-bottom:4px}
 .door p{color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:10px 0 20px}
-.price{font-family:var(--display);font-weight:800;font-size:2.2rem;color:var(--maroon);display:inline-block;margin-right:4px}
+.price{font-family:var(--display);font-weight:700;font-size:1.25rem;color:var(--maroon);display:inline-block;margin-right:4px}
 .price small{font-size:.9rem;font-weight:700;color:var(--ink-soft);letter-spacing:.03em}
 .door ul{list-style:none;margin:16px 0 22px}
 .door li{padding:7px 0 7px 26px;position:relative;font-size:.95rem;color:var(--ink-soft);border-bottom:1px dashed var(--line)}
@@ -401,10 +407,62 @@ header nav a.nav-buy:hover img{opacity:.75}
 /* Doors 2 & 3 — secondary, equal weight to each other */
 .door--secondary .worry{color:var(--maroon)}
 
+/* ── Two Pillars — 8 August 2026 restructure ── */
+.pillars{display:flex;flex-direction:column;gap:26px}
+.pillar{background:#fff;border:3px solid var(--charcoal);padding:44px 38px}
+.pillar-head{margin-bottom:16px}
+.pillar-logo{height:38px;width:auto;display:block}
+.pillar-logo--liveask{height:30px}
+.pillar .worry{font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;color:var(--maroon);margin-bottom:10px}
+.pillar--liveask .worry{color:var(--logo-blue)}
+.pillar>p{color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:10px 0 20px}
+.pillar .price{font-family:var(--display);font-weight:700;font-size:1.25rem;color:var(--charcoal);display:block;margin:14px 0 20px}
+.pillar .price small{font-size:.85rem;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;display:block;margin-top:4px}
+.pillar--liveask{border-color:var(--navy)}
+
+/* GenSeen's three internal steps — burgundy intensity gradient shows
+   hierarchy WITHIN the Pillar, matching the flagship/entry/ongoing weight
+   of each — GenSeen's own outer card stays charcoal (Pillar-level parity
+   with LiveAsk), burgundy is reserved for this internal distinction only. */
+.step--gencheck{border-top:3px solid var(--gencheck-tint)}
+.step--gencheck .stepname{color:var(--gencheck-tint)}
+.step--gengrid{border-top:3px solid var(--maroon)}
+.step--gengrid .stepname{color:var(--maroon)}
+.step--genguard{border-top:3px solid var(--genguard-muted)}
+.step--genguard .stepname{color:var(--genguard-muted)}
+.step-price{font-family:var(--display);font-weight:800;font-size:1.3rem;color:var(--ink);margin:14px 0 10px}
+
+/* ── Product name split colour treatment — matches the PromptWorkx and
+   LiveAsk marks exactly: prefix ("Gen"/"Prompt") always Dark Charcoal,
+   only the suffix carries the product's own tier colour. Inter, not the
+   site's display font — this is brand wordmark treatment, not a heading. ── */
+.step h4,.door--advisory h3{font-family:var(--product-font);text-transform:none;letter-spacing:0;font-weight:800;font-size:1.5rem;margin-bottom:6px}
+.prefix{color:var(--charcoal)}
+.tm{font-size:.6em;vertical-align:super;color:var(--charcoal)}
+.suffix--gencheck{color:var(--gencheck-tint)}
+.suffix--gengrid{color:var(--maroon)}
+.suffix--genguard{color:var(--genguard-muted)}
+.suffix--amber{color:var(--amber)}
+
+/* ── Advisory Services — lighter-touch, deliberately lower visual weight
+   than the Two Pillars above, matched amber pair, not differentiated
+   from each other ── */
+.advisory{padding:56px 0;background:#F1F0EB;border-top:1px solid var(--line)}
+.advisory .eyebrow{color:var(--amber);font-size:1.1rem}
+.advisory h2{font-size:clamp(1.6rem,3.6vw,2.2rem);color:var(--navy);margin:10px 0 8px}
+.advisory .sub{color:var(--ink-soft);max-width:60ch;margin-bottom:30px}
+.worry--section{font-family:var(--display);font-size:1.15rem;color:var(--navy);margin:8px 0 14px;max-width:50ch}
+.closeline{font-weight:700;color:var(--ink);margin-top:-8px}
+.advisory .doors{flex-direction:row;flex-wrap:wrap}
+.advisory .door{flex:1;min-width:280px;padding:28px 26px}
+.door--advisory{border-top:4px solid var(--amber)}
+.door--advisory .worry{color:var(--amber)}
+.door--advisory .price{color:var(--ink);display:block;margin:14px 0 20px}
+
 /* ── About ──────────────────────────── */
 .about{padding:72px 0;background:var(--paper)}
 .about .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start}
-.about h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 18px}
+.about h2{font-size:clamp(2rem,5vw,3rem);color:var(--logo-blue);margin:12px 0 18px}
 .about p{color:var(--ink-soft);margin-bottom:14px}
 .about strong{color:var(--ink)}
 .statcard{background:var(--navy);color:#fff;padding:30px 26px}
@@ -427,6 +485,11 @@ header nav a.nav-buy:hover img{opacity:.75}
 .qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
 blockquote{background:#fff;border-left:4px solid var(--maroon);padding:26px 24px;font-size:1rem;color:var(--ink-soft)}
 blockquote footer{margin-top:14px;font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--ink)}
+/* Conviction-change callout — deliberately distinct from the standard
+   pull-quote above it (About revamp, 8 August 2026): tinted amber box,
+   italic, no left-border-only treatment, so it reads as a separate aside
+   rather than a second instance of the same quote style. */
+.about-callout{background:#FBF3E7;border-left:none;border-radius:8px;font-style:italic;margin-top:20px}
 
 /* ── Contact ────────────────────────── */
 .contact{background:var(--navy);color:#fff;padding:80px 0;text-align:left}
@@ -476,8 +539,85 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       <h1>Your customers are asking AI who to use. <em>Are they seeing your&nbsp;name?</em></h1>
       <p class="lede">Google AI, ChatGPT, Gemini, Claude and Perplexity now answer that question directly — often before anyone clicks a website. Most businesses have no idea what those systems say about them, whether they're recommended at all, or who's getting the enquiry instead. I show you, live, in fifteen minutes.</p>
       <div class="ctas">
-        <a class="btn btn--primary" href="#visibility-audit-card">What is our AI Visibility Audit?</a>
-        <a class="btn btn--outline" href="#proof">See what happened to my own business</a>
+        <a class="btn btn--outline btn--compact" href="#proof">See what happened to our businesses</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="services" id="services">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--dark">Services</p>
+      <div class="pillars">
+
+        <article class="pillar" id="genseen-pillar">
+          <div class="pillar-head">
+            <img src="/genseen-logo.png" alt="GenSeen" class="pillar-logo">
+          </div>
+          <p class="worry">"Can customers find us when they ask AI?"</p>
+          <p>Most businesses have never checked what AI systems say about them — or who's being recommended instead. Three steps, in sequence: check, fix, protect.</p>
+          <div class="stepgrid">
+            <div class="step step--gencheck">
+              <p class="stepname">Evaluation</p>
+              <h4><span class="prefix">Gen</span><span class="suffix suffix--gencheck">Check</span><span class="tm">™</span></h4>
+              <p>We provide a precise, evidence-based diagnostic of how AI currently represents your business when a real customer asks about it — what's said, who's recommended in your place, and exactly why. You leave with a clear, prioritised list of what's fixable, from someone who understands the mechanics behind it, not a guess you could've made yourself.</p>
+              <p class="step-price">$300</p>
+              <a class="btn btn--primary" href="#" data-nav-intent="book-audit">Book a GenCheck</a>
+            </div>
+            <div class="step step--gengrid">
+              <p class="stepname">Solution</p>
+              <h4><span class="prefix">Gen</span><span class="suffix suffix--gengrid">Grid</span><span class="tm">™</span></h4>
+              <p>Once we know what's broken, we fix it — the structural machine-layer work (schema, entity consistency, structured data) that helps AI systems find, understand, and correctly recommend your business.</p>
+              <p class="step-price">From $2,000</p>
+              <a class="btn btn--outline" href="#" data-nav-intent="enquire-build">Enquire about GenGrid</a>
+            </div>
+            <div class="step step--genguard">
+              <p class="stepname">Protection</p>
+              <h4><span class="prefix">Gen</span><span class="suffix suffix--genguard">Guard</span><span class="tm">™</span></h4>
+              <p>Continuous share-of-voice tracking and protection against AI drift, so today's fix doesn't quietly become tomorrow's problem.</p>
+              <p class="step-price">From $600/month</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="pillar pillar--liveask" id="liveask-pillar">
+          <div class="pillar-head">
+            <img src="/liveask-logo.svg" alt="LiveAsk" class="pillar-logo pillar-logo--liveask">
+          </div>
+          <p class="worry">"Every website exists to get a visitor to act. Most have quietly never actually managed it."</p>
+          <p>That's what a call to action actually is — the one moment a site earns its purpose. And for decades, most sites have failed it in the same three ways. Hoping someone finds the phone number, then dials it. Handing over a form demanding name, email, and phone before a single real question gets answered. Lately, a chatbox — the same dead end, just dressed up, still running scripted non-answers behind a friendlier interface.</p>
+          <p>LiveAsk is the first call to action that actually behaves like a real conversation. It answers the visitor's actual question, in context, on the spot — and captures a qualified lead as the natural outcome of that conversation, not the toll they have to pay before it starts. Setup and ongoing management are included as one package — nothing extra to opt into later.</p>
+          <p class="price">Setup from $4,000 <small>+ management from $600/month</small></p>
+          <a class="btn btn--liveask" href="/liveask/">See LiveAsk in Action</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="advisory" id="advisory">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--dark">Promptworkx Advisory Services</p>
+      <p class="worry worry--section">"Two questions every AI-using business eventually has to answer — most don't know who to ask."</p>
+      <p class="sub">GenSeen gets you found. LiveAsk turns that into customers. Advisory Services covers what sits behind both — whether your team is actually using AI safely, and where AI should take your business next. Each one is a single, focused engagement, not an open-ended program: a straight, expert answer to a question no template can give you.</p>
+      <div class="doors">
+
+        <article class="door door--advisory">
+          <p class="worry">"Does your business have an AI Use Protocol yet? Where would you even get one?"</p>
+          <h3><span class="prefix">Prompt</span><span class="suffix suffix--amber">Guide</span><span class="tm">™</span></h3>
+          <p>This isn't a copy-paste job, the way a WHS Policy or a Workplace Discrimination Policy might be — there's no off-the-shelf AI template sitting in a compliance library, because the real risks depend entirely on how your team actually uses AI, not a generic checklist. Some of your staff may already be using it well. Others might be burning hours chasing AI functions that quietly work against what your business actually needs. We sit down, find out exactly where the real risks — and the real opportunities — actually sit in your business, and build a custom AI Use Protocol around what we find. Not a template with your logo on it.</p>
+          <p class="closeline">PromptGuide takes the guesswork — and the risk — out of how your business actually uses AI.</p>
+          <p class="price">from $900</p>
+          <a class="btn btn--dark" href="#" data-nav-intent="register-protocol">Secure your team</a>
+        </article>
+
+        <article class="door door--advisory">
+          <p class="worry">"AI could help us. Where do we even start?"</p>
+          <h3><span class="prefix">Prompt</span><span class="suffix suffix--amber">Spec</span><span class="tm">™</span></h3>
+          <p>A deliberately scoped assessment — not a build, not an automation project, and not a pitch for one either. Most AI advice comes from whoever's also selling the fix, which quietly shapes the advice before you ever hear it. We don't build automation and we don't deliver training, so there's nothing here for us to sell you into. We map where AI could genuinely help across your operations — and just as importantly, where it isn't worth the effort — then, if there's a real opportunity, point you to the right specialist: an automation partner for a build, a training partner if what you're actually short on is staff who know how to use the tools you've already got. An honest map and a name to call — not a 60-page framework and a quote for whatever we happen to sell.</p>
+          <p class="price">from $1,500</p>
+          <a class="btn btn--dark" href="#" data-nav-intent="enquire-opportunity">Get your assessment</a>
+        </article>
+
       </div>
     </div>
   </section>
@@ -485,79 +625,13 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   <section class="proof" id="proof">
     <div class="wrap">
       <p class="eyebrow">The proof · What AI actually said</p>
-      <h2>I tested my own businesses first.</h2>
+      <h2>We tested our own businesses first.</h2>
       <div class="finding">
-        <p>I asked Google's AI what PromptWorkx does. It got the services right — down to the exact wording on this page.</p>
-        <p><strong>Then it named the founder as someone I've never met.</strong></p>
+        <p>We asked Google's AI what PromptWorkx does. It got the services right — down to the exact wording on this page.</p>
+        <p><strong>Then it named the founder as someone we've never met.</strong></p>
         <p>That's not a glitch. It's what happens when a business hasn't taken control of what AI systems know about it — and it's happening to businesses across Brisbane right now, without anyone finding out.</p>
       </div>
-      <p class="phone">It's not just business search that's changed. Last week I needed a new phone — no Apple, no Samsung, nothing Chinese-made, fingerprint and NFC, a set price range. I gave an AI those constraints instead of typing three words into Google. It named <strong>one specific phone, on special, at one specific store.</strong> I walked in and bought it two hours later. No blue links. No comparison shopping. One AI-vetted recommendation, acted on immediately. That's the buyer journey your customers are already on.</p>
-    </div>
-  </section>
-
-  <section class="pitch">
-    <div class="wrap">
-      <p class="eyebrow eyebrow--dark">The point</p>
-      <h2>Three problems. Three doors in.</h2>
-      <p>Every business I work with is worried about one of three things: <strong>whether customers can find them</strong>, <strong>what their staff are already doing with AI unsupervised</strong>, or <strong>where AI could genuinely help and where it's a waste of money.</strong> Pick the one that's actually keeping you up at night.</p>
-      <p>No jargon, no 12-month transformation roadmap, no software to buy. Your business, demonstrated live — never a canned demo.</p>
-    </div>
-  </section>
-
-  <section class="services" id="services">
-    <div class="wrap">
-      <p class="eyebrow eyebrow--dark">Services</p>
-      <h2>Pick the door that matches your worry</h2>
-      <p class="sub">Three genuinely different problems. Each one stands on its own — you don't need to care about the other two to get real value from any single one.</p>
-      <div class="doors">
-
-        <article class="door door--flag" id="visibility-audit-card">
-          <p class="worry">"Can customers find us when they ask AI?"</p>
-          <h3>AI Visibility</h3>
-          <p>The problem this page opened with. Most businesses have never checked what AI systems say about them — or who's being recommended instead. Two steps, in sequence.</p>
-          <div class="stepgrid">
-            <div class="step">
-              <p class="stepname">Step one</p>
-              <h4>Visibility Audit — $300</h4>
-              <p>I run the exact questions your customers are already asking AI — live, on screen, in front of you. You see precisely what's said, who's recommended instead of you, and what's fixable.</p>
-              <a class="btn btn--primary" href="#" data-nav-intent="book-audit">Book an Audit</a>
-            </div>
-            <div class="step">
-              <p class="stepname">Step two</p>
-              <h4>Visibility Build — from $2,000</h4>
-              <p>Once we know what's broken, I fix it — the structural work that helps AI systems find, understand and correctly recommend your business, plus ongoing management as the landscape shifts.</p>
-              <a class="btn btn--outline" href="#" data-nav-intent="enquire-build">Enquire</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="door door--secondary">
-          <p class="worry">"Our staff are already using AI — unsupervised."</p>
-          <h3>Custom AI Use Protocol</h3>
-          <p class="price">$900</p>
-          <p>Your team is already pasting client data, drafts and decisions into AI tools with no policy at all. I review actual practices, then deliver a protocol: the do's, the don'ts, the no-go zones, and the opportunities you're leaving on the table.</p>
-          <ul>
-            <li>Staff practice review — what's really happening</li>
-            <li>Written protocol: safe use, data rules, no-go zones</li>
-            <li>One-hour briefing to land it with your team</li>
-          </ul>
-          <a class="btn btn--dark" href="#" data-nav-intent="register-protocol">Register interest</a>
-        </article>
-
-        <article class="door door--secondary">
-          <p class="worry">"AI could help us. Where do we even start?"</p>
-          <h3>AI Opportunity Audit</h3>
-          <p class="price">$1,500</p>
-          <p>The full sweep. I map your workflows end to end, identify where AI — including agentic tools and automation — genuinely earns its keep, and where it doesn't, and hand you a prioritised, plain-English action plan.</p>
-          <ul>
-            <li>End-to-end workflow review</li>
-            <li>Prioritised opportunities, ranked by payoff</li>
-            <li>Plain-English roadmap — yours to keep, no lock-in</li>
-          </ul>
-          <a class="btn btn--dark" href="#" data-nav-intent="enquire-opportunity">Enquire about an audit</a>
-        </article>
-
-      </div>
+      <p class="phone">It's not just business search that's changed. Last week we needed a new phone — no Apple, no Samsung, nothing Chinese-made, fingerprint and NFC, a set price range. We gave an AI those constraints instead of typing three words into Google. It named <strong>one specific phone, on special, at one specific store.</strong> We walked in and bought it two hours later. No blue links. No comparison shopping. One AI-vetted recommendation, acted on immediately. That's the buyer journey your customers are already on.</p>
     </div>
   </section>
 
@@ -565,12 +639,19 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     <div class="wrap">
       <div class="grid">
         <div>
-          <p class="eyebrow eyebrow--dark">About</p>
-          <h2>Why listen to this bloke?</h2>
-          <p>I'm <strong>Chris Carroll</strong> — Brisbane-based founder, consultant and musician. PromptWorkx wasn't born in a strategy deck. It was born from <strong>2,500 hours and 20,000 prompts</strong> spent building a working app with no coding experience — learning, the hard way, exactly what AI can and can't do for someone with a real goal and no technical safety net.</p>
-          <p>That journey turned into a method. The method turned into results — like a full music release campaign, from dawn idea to every platform plus print, inside 13 hours.</p>
-          <p>I've spent my working life adopting each new wave of technology early and turning it into practical advantage. AI is the biggest wave yet, and most businesses are standing on the beach. My job is simple: show you, using your own work, what's now possible — then hand you the keys.</p>
-          <p>Based in Brisbane, working with businesses across Australia — every audit and session runs live over video, wherever you are.</p>
+          <p class="eyebrow eyebrow--dark">About PromptWorkx</p>
+          <h2>Chris Carroll isn't a backroom coder — and that's exactly the point.</h2>
+          <p>Founder of PromptWorkx, <strong>Chris Carroll</strong> built his understanding of AI the same way he's built every skill in his career: hands-on, in the field, solving a real problem until it worked. Before AI, he spent decades as a business owner, a salesman across both retail and B2B, a merchandiser, an app creator and a marketer — the kind of grounding that comes from actually running things, not just advising on them.</p>
+          <p>That combination is what makes PromptWorkx different. Most AI-visibility consultants come from a technical or marketing background alone. Chris brings the full commercial picture — sales psychology, customer behaviour, and hands-on product-building — to a discipline most agencies still treat as a purely technical exercise.</p>
+          <p>The proof is direct, not theoretical. <strong>2,500 hours and 20,000 prompts</strong> in the first six months — nights and weekends around a full-time government job, then full days once he left it. A full music release campaign — every platform, plus print — planned and executed inside 13 hours. Real output, built the same way client work gets built: fast, tested, and genuinely functional.</p>
+          <p>Every audit and session runs live over video — Brisbane-based, working with businesses across Australia.</p>
+          <blockquote>
+            "My job is simple — show you, using your own business, what's actually possible. Then hand you the keys."
+            <footer>— Chris Carroll</footer>
+          </blockquote>
+          <blockquote class="about-callout">
+            Until AI, I was the guy telling everyone it would cost millions of jobs — and quietly wondering if Terminator was a documentary. I only changed my mind after six months, night and day, actually putting it to the test myself. If you're still skeptical, I get it. I was you.
+          </blockquote>
         </div>
         <aside class="statcard" aria-label="Track record at a glance">
           <dl>
@@ -591,7 +672,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       <div class="faqlist">
 
         <article class="faqitem">
-          <h3>What actually happens in an AI Visibility Audit?</h3>
+          <h3>What happens in a GenCheck session?</h3>
           <p>I run the questions your customers are already asking — about your business, your trade, your area — live, in front of you, across the AI systems people actually use. You see exactly what's said, whether you're named at all, and who's being recommended instead. No slides, no theory — your real business, live on screen.</p>
         </article>
 
@@ -601,7 +682,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
         </article>
 
         <article class="faqitem">
-          <h3>How is this different from SEO?</h3>
+          <h3>How is GenSeen your GEO service different to SEO?</h3>
           <p>SEO gets you ranked in a list of links. This is about something newer: when someone asks an AI system a question directly and it gives one answer, not ten — is your business the one it names? That's a different, growing part of how customers find businesses now, and most SEO work doesn't touch it at all.</p>
         </article>
 
@@ -611,12 +692,12 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
         </article>
 
         <article class="faqitem">
-          <h3>What if the audit finds nothing wrong?</h3>
+          <h3>What if GenCheck finds nothing wrong?</h3>
           <p>Then you'll know that for certain, instead of guessing — and that's genuinely useful too. I'm not going to manufacture a problem to sell you a fix. If your business is already well represented, I'll tell you so.</p>
         </article>
 
         <article class="faqitem">
-          <h3>How quickly will this change what AI says about my business?</h3>
+          <h3>How quickly will your GenGrid implementation take effect?</h3>
           <p>Some things move within weeks. Others — particularly showing up when someone asks a general question without naming your business — take longer and depend on building genuine, ongoing presence, not a single fix. I'll always tell you honestly which is which, rather than promising a timeline I can't back up.</p>
         </article>
 
