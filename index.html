@@ -289,16 +289,20 @@ header nav a.nav-buy:hover img{opacity:.75}
 
 /* ── Ask PromptWorkx panel ──────────── */
 .ask-panel{padding:10px 0;background:var(--paper);position:sticky;top:0;z-index:50;border-bottom:1px solid transparent;transition:border-color .2s}
+.ask-panel .wrap{padding:0 4px 0 10px}
 .ask-panel.pinned{border-bottom-color:var(--line)}
-.ask-box{background:#fff;border:1px solid var(--line);max-width:640px;margin:0 auto;box-shadow:0 2px 0 rgba(29,42,58,.05);border-radius:28px;transition:border-radius .2s}
+.ask-box{background:#fff;border:1px solid var(--line);width:100%;margin:0 auto;box-shadow:0 2px 0 rgba(29,42,58,.05);border-radius:28px;transition:border-radius .2s}
 .ask-box.expanded{border-radius:20px}
-.ask-input-row{position:relative;display:flex;align-items:flex-end;gap:8px;padding:16px 20px}
-.ask-input-row textarea{flex:1;border:none;outline:none;font-family:var(--body);font-size:1.05rem;color:var(--ink);background:transparent;position:relative;z-index:2;resize:none;max-height:6.6em;line-height:1.5;padding:8px 0 8px 98px;overflow-y:auto}
-.ask-fake-placeholder{position:absolute;left:118px;top:50%;transform:translateY(-50%);font-family:var(--body);font-size:1.05rem;color:var(--ink-soft);pointer-events:none;transition:opacity .6s ease;z-index:1;max-width:calc(100% - 218px);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ask-input-row{position:relative;display:flex;align-items:flex-end;gap:6px;padding:14px 16px}
+.ask-input-row textarea{flex:1;border:none;outline:none;font-family:var(--body);font-size:1.15rem;color:var(--ink);caret-color:var(--ink);background:transparent;position:relative;z-index:2;resize:none;max-height:6.6em;line-height:1.1;padding:8px 0 8px 85px;overflow-y:auto}
+.ask-fake-placeholder{position:absolute;left:115px;top:50%;transform:translateY(-50%) translateZ(0);will-change:contents;font-family:var(--body);font-size:1.15rem;color:var(--ink-soft);pointer-events:none;transition:opacity .6s ease;z-index:1;max-width:calc(100% - 210px);line-height:1.1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .ask-fake-placeholder.fade{opacity:0}
+/* Scoped to the "Ask another question..." message only — never the
+   rotating landing prompts, per explicit correction 7 August 2026. */
+.ask-fake-placeholder--final{text-align:right;font-size:0.92rem;left:20px;max-width:none;width:calc(100% - 120px);white-space:nowrap;display:block;overflow:visible}
 /* ── LiveAsk mark — inline at the panel's leading edge, real native cursor
    sits immediately after it (see textarea/placeholder left offset above) ── */
-.ask-liveask-inline{position:absolute;left:20px;top:50%;transform:translateY(-50%);height:20px;width:auto;z-index:2;pointer-events:none}
+.ask-liveask-inline{position:absolute;left:16px;top:50%;transform:translateY(-50%);height:20px;width:auto;z-index:2;pointer-events:none}
 .ask-mic{background:none;border:none;color:var(--ink-soft);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;z-index:2;transition:background .15s,color .15s}
 .ask-mic:hover{background:var(--paper);color:var(--navy)}
 .ask-mic svg{width:19px;height:19px}
@@ -683,14 +687,18 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     askPanel.classList.toggle('pinned', window.scrollY > 4);
   }, { passive: true });
   let rotateFadeTimeout = null;
-  let rotateTimer = setInterval(function(){
-    ph.classList.add('fade');
-    rotateFadeTimeout = setTimeout(function(){
-      i = (i + 1) % prompts.length;
-      ph.textContent = prompts[i];
-      ph.classList.remove('fade');
-    }, 600);
-  }, 8000);
+  let rotateTimer = null;
+  function startRotation(){
+    rotateTimer = setInterval(function(){
+      ph.classList.add('fade');
+      rotateFadeTimeout = setTimeout(function(){
+        i = (i + 1) % prompts.length;
+        ph.textContent = prompts[i];
+        ph.classList.remove('fade');
+      }, 600);
+    }, 8000);
+  }
+  startRotation();
 
   function pauseRotation(){
     ph.classList.add('fade');
@@ -698,13 +706,42 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   // Real bug fix, 7 August 2026: the placeholder previously only faded on
   // typing or submit — simply clicking into the empty field left it fully
   // visible, cluttering the real native caret rendering right on top of it.
+  // 7 August 2026, later: the panel now auto-focuses on page load so the
+  // real cursor is blinking immediately, not only after a tap. That first,
+  // script-triggered focus must NOT fade the placeholder (visitors should
+  // still see the rotating prompt suggestions) — only a genuine user tap
+  // should trigger the fade. autoFocusPending tracks that distinction.
+  let autoFocusPending = true;
   input.addEventListener('focus', function(){
-    pauseRotation();
+    if (autoFocusPending) {
+      autoFocusPending = false;
+    } else {
+      // Real bug fix, 7 August 2026: this was previously outside the
+      // if/else, so it fired on the very first auto-triggered landing
+      // focus too — killing rotation before it ever got to cycle even
+      // once, freezing the placeholder on its first static prompt. Moved
+      // here so only a genuine subsequent tap (or the post-submit refocus,
+      // which is itself gated by autoFocusPending) stops it.
+      pauseRotation();
+      clearInterval(rotateTimer); rotateTimer = null;
+      clearTimeout(rotateFadeTimeout);
+    }
   });
   input.addEventListener('blur', function(){
     if (input.value.length === 0) {
       ph.classList.remove('fade');
     }
+  });
+  // Auto-focus on landing so the real cursor blinks immediately. Note: some
+  // mobile browsers (notably iOS Safari) restrict or ignore programmatic
+  // focus without a genuine user gesture first — this may not reliably open
+  // the keyboard or show a caret on every device. Worth confirming on real
+  // hardware, not assuming universal behaviour.
+  window.addEventListener('load', function(){
+    input.blur();
+    requestAnimationFrame(function(){
+      input.focus({ preventScroll: true }); // real paint gap before refocus — back-to-back blur/focus can get coalesced by the browser with no gap between them
+    });
   });
   function autoGrow(){
     input.style.height = 'auto';
@@ -712,6 +749,15 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   }
   input.addEventListener('input', function(){
     ph.classList.toggle('fade', input.value.length > 0);
+    // Real bug fix, 7 August 2026: rotation-stop only ever lived inside the
+    // 'focus' event handler — but clicking into an ALREADY-focused element
+    // (which it is, after page-load autofocus) never fires a new focus
+    // event at all. So typing directly after landing never stopped
+    // rotation, even though it looked like it should. The 'input' event
+    // fires on every real keystroke regardless of focus history — the
+    // actually reliable signal for "user is genuinely typing."
+    clearInterval(rotateTimer); rotateTimer = null;
+    clearTimeout(rotateFadeTimeout);
     autoGrow();
   });
 
@@ -744,9 +790,10 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       thread.appendChild(v);
     }
 
-    clearInterval(rotateTimer);
+    clearInterval(rotateTimer); rotateTimer = null;
     clearTimeout(rotateFadeTimeout);
-    ph.textContent = 'Ask another question, or get PromptWorkx to contact you';
+    ph.innerHTML = 'Ask another question<br>or get PromptWorkx<br>to contact you';
+    ph.classList.add('ask-fake-placeholder--final');
     ph.classList.remove('fade');
 
     conversationHistory.push({ role: 'user', content: promptText });
@@ -756,6 +803,16 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     thinking.textContent = 'PromptWorkx is thinking…';
     thread.appendChild(thinking);
     thread.scrollTop = thread.scrollHeight;
+    // Real fix, 7 August 2026: this refocus previously ran BEFORE the
+    // thinking-bubble append and scroll above — both real DOM mutations
+    // that immediately undid it, so the cursor never actually stayed
+    // visible long enough to be seen. Moved to after every synchronous
+    // mutation in this function completes.
+    autoFocusPending = true;
+    input.blur();
+    requestAnimationFrame(function(){
+      input.focus({ preventScroll: true }); // real paint gap before refocus — back-to-back blur/focus can get coalesced by the browser with no gap between them
+    });
 
     fetch(WORKER_URL, {
       method: 'POST',
@@ -773,6 +830,17 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
         a.querySelector('p').textContent = replyText;
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
+        // Real fix, 7 August 2026: the async reply lands well after the
+        // earlier submit-time refocus, and appending it here is a real DOM
+        // mutation that can reset the caret blink a second time — same
+        // underlying browser behaviour as the rotation-text issue, just
+        // triggered later in the flow. Refocus again once the reply is
+        // actually in.
+        autoFocusPending = true;
+        input.blur();
+        requestAnimationFrame(function(){
+          input.focus({ preventScroll: true }); // real paint gap before refocus
+        });
       })
       .catch(function(){
         thinking.remove();
@@ -782,6 +850,11 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
         a.querySelector('p').textContent = "That's taking longer than it should — try again, or jump straight to a door below.";
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
+        autoFocusPending = true;
+        input.blur();
+        requestAnimationFrame(function(){
+          input.focus({ preventScroll: true }); // real paint gap before refocus
+        });
       });
   }
 
@@ -855,6 +928,16 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       if(!cfg) return;
       document.getElementById('ask-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
       pauseRotation();
+      // Real bug fix, 7 August 2026: this handler's own refocus deliberately
+      // sets autoFocusPending=true (to protect the "Ask another question..."
+      // text from immediately re-fading) — but that also skips the focus
+      // handler's clearInterval/clearTimeout, since both live in the same
+      // branch. Rotation was NEVER actually stopping after a nav click like
+      // Contact — it kept firing every 8s in the background indefinitely,
+      // explaining both the text-ghosting and the cursor disruption. Made
+      // unconditional here, not dependent on that shared branch at all.
+      clearInterval(rotateTimer); rotateTimer = null;
+      clearTimeout(rotateFadeTimeout);
       thread.classList.add('active');
       document.querySelector('.ask-box').classList.add('expanded');
 
@@ -876,8 +959,23 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       // this fixed opener itself, no cost, no drift, no AI improvisation.
       conversationHistory.push({ role: 'assistant', content: cfg.reply });
 
-      ph.textContent = 'Ask another question, or get PromptWorkx to contact you';
+      ph.innerHTML = 'Ask another question<br>or get PromptWorkx<br>to contact you';
+    ph.classList.add('ask-fake-placeholder--final');
       ph.classList.remove('fade');
+      // Real fix, 7 August 2026: this handler's refocus was already ordered
+      // correctly (after the DOM mutations above) — but scrollIntoView at
+      // the top uses smooth/animated scrolling, which keeps running for
+      // several hundred ms AFTER this synchronous code finishes. The still-
+      // completing scroll animation was resetting blink even though focus
+      // itself was set correctly. Delaying until the animation has actually
+      // finished, not just until our own code has run.
+      setTimeout(function(){
+        autoFocusPending = true;
+        input.blur();
+        requestAnimationFrame(function(){
+          input.focus({ preventScroll: true }); // real paint gap before refocus
+        });
+      }, 500);
     });
   });
 
