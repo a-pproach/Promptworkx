@@ -379,7 +379,7 @@ header nav a.nav-buy:hover img{opacity:.75}
 .services h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 8px}
 .services .sub{color:var(--ink-soft);max-width:58ch;margin-bottom:40px}
 .doors{display:flex;flex-direction:column;gap:26px}
-.door{background:#fff;border:1px solid var(--line);padding:34px 30px}
+.door{padding:0}
 .door .worry{font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:6px}
 .door h3{font-size:1.7rem;color:var(--navy);margin-bottom:4px}
 .door p{color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:10px 0 20px}
@@ -409,15 +409,21 @@ header nav a.nav-buy:hover img{opacity:.75}
 
 /* ── Two Pillars — 8 August 2026 restructure ── */
 .pillars{display:flex;flex-direction:column;gap:26px}
-.pillar{background:#fff;border:3px solid var(--charcoal);padding:44px 38px}
-.pillar-head{margin-bottom:16px}
-.pillar-logo{height:38px;width:auto;display:block}
+.pillar{border-top:3px solid var(--charcoal);padding:20px 0 0}
+.pillar-head{margin-bottom:14px}
+.pillar-logo{height:64px;width:auto;display:block}
 .pillar .worry{font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;color:var(--maroon);margin-bottom:10px}
 .pillar--liveask .worry{color:var(--logo-blue)}
 .pillar>p{color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:10px 0 20px}
+.ways-list{list-style:none;color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:0 0 20px;padding:0}
+.ways-list li{position:relative;padding-left:18px;margin-bottom:10px}
+.ways-list li::before{content:"–";position:absolute;left:0;color:var(--navy)}
+.emphasis-blue{color:var(--logo-blue)}
+.line-burgundy,.line-burgundy strong{color:var(--maroon)}
+.term-link{color:var(--logo-blue);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;cursor:pointer}
 .pillar .price{font-family:var(--display);font-weight:700;font-size:1.25rem;color:var(--charcoal);display:block;margin:14px 0 20px}
 .pillar .price small{font-size:.85rem;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;display:block;margin-top:4px}
-.pillar--liveask{border-color:var(--navy)}
+.pillar--liveask{border-top-color:var(--navy)}
 
 /* GenSeen's three internal steps — burgundy intensity gradient shows
    hierarchy WITHIN the Pillar, matching the flagship/entry/ongoing weight
@@ -453,7 +459,7 @@ header nav a.nav-buy:hover img{opacity:.75}
 .worry--section{font-family:var(--display);font-size:1.15rem;color:var(--navy);margin:8px 0 14px;max-width:50ch}
 .closeline{font-weight:700;color:var(--ink);margin-top:-8px}
 .advisory .doors{flex-direction:row;flex-wrap:wrap}
-.advisory .door{flex:1;min-width:280px;padding:28px 26px}
+.advisory .door{flex:1;min-width:280px;padding:24px 0 0}
 .door--advisory{border-top:4px solid var(--amber)}
 .door--advisory .worry{color:var(--amber)}
 .door--advisory .price{color:var(--ink);display:block;margin:14px 0 20px}
@@ -536,16 +542,12 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     <div class="wrap">
       <p class="eyebrow">AI Visibility · Brisbane</p>
       <h1>Your customers are asking AI who to use. <em>Are they seeing your&nbsp;name?</em></h1>
-      <p class="lede">Google AI, ChatGPT, Gemini, Claude and Perplexity now answer that question directly — often before anyone clicks a website. Most businesses have no idea what those systems say about them, whether they're recommended at all, or who's getting the enquiry instead. I show you, live, in fifteen minutes.</p>
-      <div class="ctas">
-        <a class="btn btn--outline btn--compact" href="#proof">See what happened to our businesses</a>
-      </div>
+      <p class="lede">Google AI, ChatGPT, Gemini, Claude and Perplexity now answer that question directly — often before anyone clicks a website. Most businesses have no idea what those systems say about them, whether they're recommended at all, or who's getting the enquiry instead.<br>We help you address this with the urgency your business deserves!</p>
     </div>
   </section>
 
   <section class="services" id="services">
     <div class="wrap">
-      <p class="eyebrow eyebrow--dark">Services</p>
       <div class="pillars">
 
         <article class="pillar" id="genseen-pillar">
@@ -553,7 +555,11 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <img src="/genseen-logo.png" alt="GenSeen" class="pillar-logo">
           </div>
           <p class="worry">"Can customers find us when they ask AI?"</p>
-          <p>Most businesses have never checked what AI systems say about them — or who's being recommended instead. Three steps, in sequence: check, fix, protect.</p>
+          <p class="line-burgundy"><span class="term-link">"Generative AIs"</span> — ChatGPT, Gemini, Claude, Google AI, Perplexity — ARE the new 'search engines'.</p>
+          <p>The rules have changed. What worked before in finding your website via 'search' is vastly different to how AIs actually conduct a search.</p>
+          <p>That's what our <span class="prefix">Gen</span><span class="emphasis-blue">Seen</span> suite is all about.</p>
+          <p>Making sure <strong>Your</strong> business <strong>IS</strong> "<span class="emphasis-blue">Seen</span>" by "Generative AIs"</p>
+          <p>We help put <strong>Your</strong> business ahead of the curve before it's too late to catch up.<br>It starts with <span class="prefix">Gen</span><span class="suffix--gencheck">Check</span> explaining the new methodology and <strong>Your</strong> custom plan to <strong>Benefit</strong> from it...</p>
           <div class="stepgrid">
             <div class="step step--gencheck">
               <p class="stepname">Evaluation</p>
@@ -565,7 +571,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <div class="step step--gengrid">
               <p class="stepname">Solution</p>
               <h4><span class="prefix">Gen</span><span class="suffix suffix--gengrid">Grid</span><span class="tm">™</span></h4>
-              <p>Once we know what's broken, we fix it — the structural machine-layer work (schema, entity consistency, structured data) that helps AI systems find, understand, and correctly recommend your business.</p>
+              <p>Once we know what's broken, we fix it — the structural machine-layer work (schema, entity consistency, structured data) that helps AI systems find, understand, and correctly recommend your business.<br>Whilst your competitors are still fiddling with SEO we'll have you ahead of the pack with your custom <span class="prefix">Gen</span><span class="suffix--gengrid">Grid</span> GEO implementation.</p>
               <p class="step-price">From $2,000</p>
               <a class="btn btn--outline" href="#" data-nav-intent="enquire-build">Enquire about GenGrid</a>
             </div>
@@ -583,9 +589,14 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <img src="/LiveAsk.gif" alt="LiveAsk" class="pillar-logo">
           </div>
           <p class="worry">"Every website exists to get a visitor to act. Most have quietly never actually managed it."</p>
-          <p>That's what a call to action actually is — the one moment a site earns its purpose. And for decades, most sites have failed it in the same three ways. Hoping someone finds the phone number, then dials it. Handing over a form demanding name, email, and phone before a single real question gets answered. Lately, a chatbox — the same dead end, just dressed up, still running scripted non-answers behind a friendlier interface.</p>
-          <p>LiveAsk is the first call to action that actually behaves like a real conversation. It answers the visitor's actual question, in context, on the spot — and captures a qualified lead as the natural outcome of that conversation, not the toll they have to pay before it starts. Setup and ongoing management are included as one package — nothing extra to opt into later.</p>
-          <p class="price">Setup from $4,000 <small>+ management from $600/month</small></p>
+          <p>That's what a call to action actually is — the one moment a site earns its purpose. And for decades, most sites have failed it in the same three ways...</p>
+          <ul class="ways-list">
+            <li>Hoping someone finds the phone number, then dials it.</li>
+            <li>Handing over a form demanding name, email, and phone before a single real question gets answered.</li>
+            <li>And lately, a chatbox — the same dead end, just dressed up, still running scripted non-answers behind a friendlier interface.</li>
+          </ul>
+          <p><span class="prefix">Live</span><span class="emphasis-blue">Ask</span> is the first call to action that actually behaves like a real conversation. It answers the visitor's actual question, in context, on the spot — and captures a qualified lead as the natural outcome of that conversation, not the toll they have to pay before it starts. Setup and ongoing management are included as one package — nothing extra to opt into later.</p>
+          <p class="price">Setup from $4,000 <small>+ ongoing optimisation from $600/month</small></p>
           <a class="btn btn--liveask" href="/liveask/">See LiveAsk in Action</a>
         </article>
 
@@ -597,7 +608,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     <div class="wrap">
       <p class="eyebrow eyebrow--dark">Promptworkx Advisory Services</p>
       <p class="worry worry--section">"Two questions every AI-using business eventually has to answer — most don't know who to ask."</p>
-      <p class="sub">GenSeen gets you found. LiveAsk turns that into customers. Advisory Services covers what sits behind both — whether your team is actually using AI safely, and where AI should take your business next. Each one is a single, focused engagement, not an open-ended program: a straight, expert answer to a question no template can give you.</p>
+      <p class="sub">Advisory Services covers what sits behind both — whether your team is actually using AI safely, and where AI should take your business next. Each one is a single, focused engagement, not an open-ended program: a straight, expert answer to a question no template can give you.</p>
       <div class="doors">
 
         <article class="door door--advisory">
