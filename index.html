@@ -426,6 +426,8 @@ header nav a.nav-buy:hover img{opacity:.75}
 .line-burgundy,.line-burgundy strong{color:var(--maroon)}
 .term-link{color:var(--logo-blue);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;cursor:pointer}
 .pillar .price{font-family:var(--display);font-weight:700;font-size:1.25rem;color:var(--charcoal);display:block;margin:14px 0 20px}
+.cta-tag{font-style:italic;color:var(--ink-soft);margin:0 0 16px}
+.tap-hint{color:var(--logo-blue-deep);font-weight:700;font-size:.95rem;letter-spacing:.02em}
 .pillar .price small{font-size:.85rem;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;display:block;margin-top:4px}
 .pillar--liveask{border-top-color:var(--navy)}
 
@@ -435,7 +437,7 @@ header nav a.nav-buy:hover img{opacity:.75}
    with LiveAsk), burgundy is reserved for this internal distinction only. */
 .step--gencheck{border-top:3px solid var(--gencheck-tint)}
 .step--gencheck .stepname{color:var(--gencheck-tint)}
-.step--gengrid{border-top:3px solid var(--maroon)}
+.step--gengrid{border:3px solid var(--maroon);border-radius:6px}
 .step--gengrid .stepname{color:var(--maroon)}
 .step--genguard{border-top:3px solid var(--genguard-muted)}
 .step--genguard .stepname{color:var(--genguard-muted)}
@@ -508,6 +510,70 @@ blockquote footer{margin-top:14px;font-family:var(--mono);font-size:.8rem;letter
 .contact .ctas{display:flex;gap:14px;flex-wrap:wrap}
 footer.site{background:#0A1420;color:#7E8FA3;padding:26px 0;font-size:.85rem}
 footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ── Desktop-only condensing, 10 August 2026 ──
+   On wide screens the nav row and the LiveAsk panel were spanning the full
+   1080px .wrap edge-to-edge, forcing far more left-right eye travel than
+   the hero headline directly beneath them (which wraps at a much narrower
+   measure due to its own large font-size). This scopes a narrower width
+   specifically to those two elements at desktop widths only — mobile is
+   completely untouched, since these selectors only activate inside the
+   min-width media query below. */
+@media (min-width: 1024px){
+  header .wrap{max-width:700px}
+  .ask-panel .wrap{max-width:700px}
+  /* GenSeen pillar's intro copy (before the GenCheck/GenGrid/GenGuard
+     stepgrid) was left-hugging the row with excess empty space to its
+     right, since paragraphs had a tight 64ch cap while their container
+     spanned the full wide row. Widened and centered as a block — the
+     stepgrid below is untouched, it already reads correctly. Width
+     bumped from 700 to 800px specifically to stop 'search.' orphaning
+     onto its own line at the end of the 'What worked before...' sentence. */
+  .line-burgundy,
+  .pillar .worry,
+  #genseen-pillar > p{
+    max-width:800px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  /* The leading quote line specifically gets centred text, not just a
+     centred block — the paragraphs after it stay normal left-aligned
+     body text. */
+  .pillar .worry{text-align:center}
+  /* Two specific gaps flagged for removal — tightened, not all
+     paragraph spacing in this block. */
+  .pillar > p.tight-below{margin-bottom:0}
+  .pillar > p.tight-below + p{margin-top:0}
+  /* Adjacent block margins collapse to the LARGER of the two touching
+     values, not their sum — this is why a one-sided fix kept silently
+     failing. Setting matched values on both sides of a gap is the only
+     way to reliably control the visible result. */
+  .pillar > p.narrow-below{margin-bottom:8px}
+  .pillar > p.slight-gap{margin-top:8px}
+  /* More breathing room between the GenSeen logo and the rotating
+     AI-names gif beside it, desktop only. */
+  #genseen-pillar .pillar-head{gap:20px}
+  /* Same treatment applied to LiveAsk's pillar — widen/center its
+     paragraphs and give the logo/button row the same breathing room
+     as GenSeen's logo/gif row. */
+  #liveask-pillar > p,
+  #liveask-pillar > ul{
+    max-width:800px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  #liveask-pillar .pillar-head{gap:20px}
+  /* Advisory Services — centre the eyebrow, the section-level quote,
+     and the intro paragraph below it. */
+  .advisory .eyebrow,
+  .worry--section,
+  .advisory .sub{
+    text-align:center;
+    max-width:800px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+}
 </style>
 </head>
 <body>
@@ -560,11 +626,11 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <img src="/ai-names-rotate.gif" alt="ChatGPT, Gemini, Google AI, Claude, Perplexity" class="ai-names-gif">
           </div>
           <p class="worry">"Can customers find us when they ask AI?"</p>
-          <p class="line-burgundy"><span class="term-link">"Generative AIs"</span> — ChatGPT, Gemini, Claude, Google AI, Perplexity — ARE the new 'search engines'.</p>
-          <p>The rules have changed. What worked before in finding your website via 'search' is vastly different to how AIs actually conduct a search.</p>
-          <p>That's what our <span class="prefix">Gen</span><span class="emphasis-blue">Seen</span> suite is all about.</p>
-          <p>Making sure <strong>Your</strong> business <strong>IS</strong> "<span class="emphasis-blue">Seen</span>" by "Generative AIs"</p>
-          <p>We help put <strong>Your</strong> business ahead of the curve before it's too late to catch up.<br>It starts with <span class="prefix">Gen</span><span class="suffix--gencheck">Check</span> explaining the new methodology and <strong>Your</strong> custom plan to <strong>Benefit</strong> from it...</p>
+          <p class="line-burgundy tight-below"><span class="term-link">"Generative AIs"</span> — ChatGPT, Gemini, Claude, Google AI, Perplexity — ARE the new 'search engines'.</p>
+          <p class="narrow-below">The rules have changed.<br>What worked before in finding your website via 'search' is vastly different to how AIs actually conduct a search.</p>
+          <p class="slight-gap">That's what our <span class="prefix">Gen</span><span class="emphasis-blue">Seen</span> suite is all about.</p>
+          <p class="tight-below">Making sure your business <strong>IS</strong> "<span class="emphasis-blue">Seen</span>" by "Generative AIs"</p>
+          <p>We help put <strong>Your</strong> business ahead of the curve before it's too late to catch up.<br>It starts with <span class="prefix">Gen</span><span class="suffix--gencheck">Check</span> explaining the new methodology and your custom plan to <strong>Benefit</strong> from it...</p>
           <div class="stepgrid">
             <div class="step step--gencheck">
               <p class="stepname">Evaluation</p>
@@ -594,16 +660,17 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <img src="/LiveAsk.gif" alt="LiveAsk" class="pillar-logo pillar-logo--liveask">
             <a href="/liveask/?demo=custom-ai" class="btn-green">Make LiveAsk<br><strong>YOUR</strong> website AI</a>
           </div>
-          <p class="worry">"Every website exists to get a visitor to act. Most have quietly never actually managed it."</p>
-          <p>That's what a call to action actually is — the one moment a site earns its purpose. And for decades, most sites have failed it in the same three ways...</p>
+          <p class="worry">"Every website exists to get a visitor to act.<br>Most have quietly never actually managed it."</p>
+          <p>That's what a call to action actually is — the one moment a site earns its purpose.<br>Yet for decades, most sites have failed it in the same three ways...</p>
           <ul class="ways-list">
             <li>Hoping someone finds the phone number, then dials it.</li>
             <li>Handing over a form demanding name, email, and phone before a single real question gets answered.</li>
             <li>And lately, a chatbox — the same dead end, just dressed up, still running scripted non-answers behind a friendlier interface.</li>
           </ul>
-          <p><span class="prefix">Live</span><span class="emphasis-blue">Ask</span> is the first call to action that actually behaves like a real conversation. It answers the visitor's actual question, in context, on the spot — and captures a qualified lead as the natural outcome of that conversation, not the toll they have to pay before it starts. Setup and ongoing management are included as one package — nothing extra to opt into later.</p>
+          <p><span class="prefix">Live</span><span class="emphasis-blue">Ask</span> is the first call to action that actually behaves like a real conversation.<br>It answers the visitor's actual question, in context, on the spot — and captures a qualified lead as the natural outcome of that conversation.</p>
+          <p class="cta-tag"><strong>So here's Our "call to action"...</strong><br>Click the green button above to start a conversation with Our AI about how it can become Your AI!</p>
           <p class="price">From $2,000 <small>+ ongoing optimisation from $600/month</small></p>
-          <a class="btn btn--liveask" href="/liveask/">See LiveAsk in Action</a>
+          <p class="tap-hint">TAP INSIDE THE <strong>LiveAsk</strong> PANEL TO ASK ABOUT ANY OF OUR SERVICES</p>
         </article>
 
       </div>
@@ -614,7 +681,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     <div class="wrap">
       <p class="eyebrow eyebrow--dark">Promptworkx Advisory Services</p>
       <p class="worry worry--section">"Two questions every AI-using business eventually has to answer — most don't know who to ask."</p>
-      <p class="sub">Advisory Services covers what sits behind both — whether your team is actually using AI safely, and where AI should take your business next. Each one is a single, focused engagement, not an open-ended program: a straight, expert answer to a question no template can give you.</p>
+      <p class="sub">Advisory Services covers what sits behind both — whether your team is actually using AI safely, and where AI should take your business next.<br>Each one is a single, focused engagement, not an open-ended program:<br>a straight, expert answer to a question no template can give you.</p>
       <div class="doors">
 
         <article class="door door--advisory">
@@ -662,11 +729,19 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
           <p>The proof is direct, not theoretical. <strong>2,500 hours and 20,000 prompts</strong> in the first six months — nights and weekends around a full-time government job, then full days once he left it. A full music release campaign — every platform, plus print — planned and executed inside 13 hours. Real output, built the same way client work gets built: fast, tested, and genuinely functional.</p>
           <p>Every audit and session runs live over video — Brisbane-based, working with businesses across Australia.</p>
           <blockquote>
-            "My job is simple — show you, using your own business, what's actually possible. Then hand you the keys."
-            <footer>— Chris Carroll</footer>
+            PromptWorkx was built to help you use AI to actually grow your business. It starts with being found, then converting the people who find you into real customers.
+            <br><br>
+            That's not the whole story. While much of the industry chases automation and agents aimed at cutting costs — and jobs — PromptWorkx is focused on the opposite: using AI to build your business. Proactively. Constructively. Creatively.
+            <br><br>
+            Watch this space.
+            <footer>— Chris Carroll / Founder</footer>
           </blockquote>
           <blockquote class="about-callout">
-            Until AI, I was the guy telling everyone it would cost millions of jobs — and quietly wondering if Terminator was a documentary. I only changed my mind after six months, night and day, actually putting it to the test myself. If you're still skeptical, I get it. I was you.
+            "In mid 2025, I was the guy telling everyone that AI would cost millions of jobs and musing that Terminator may have been a documentary.
+            <br><br>
+            I changed my mind when after six months, night and day of actually putting it to the test myself, I became astounded at what could be achieved.
+            <br><br>
+            If you're still skeptical, I get it. I was you."
           </blockquote>
         </div>
         <aside class="statcard" aria-label="Track record at a glance">
