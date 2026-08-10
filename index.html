@@ -482,7 +482,7 @@ header nav a.nav-buy:hover img{opacity:.75}
 .door--advisory .price{color:var(--ink);display:block;margin:14px 0 20px}
 
 /* ── About ──────────────────────────── */
-.about{padding:72px 0;background:var(--paper)}
+.about{padding:72px 0;background:var(--paper);scroll-margin-top:100px}
 .about .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start}
 .about h2{font-size:clamp(2rem,5vw,3rem);color:var(--logo-blue);margin:12px 0 18px}
 .about p{color:var(--ink-soft);margin-bottom:14px}
@@ -726,7 +726,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
           <p>This isn't a copy-paste job, the way a WHS Policy or a Workplace Discrimination Policy might be — there's no off-the-shelf AI template sitting in a compliance library, because the real risks depend entirely on how your team actually uses AI, not a generic checklist. Some of your staff may already be using it well. Others might be burning hours chasing AI functions that quietly work against what your business actually needs. We sit down, find out exactly where the real risks — and the real opportunities — actually sit in your business, and build a custom AI Use Protocol around what we find. Not a template with your logo on it.</p>
           <p class="closeline">PromptGuide takes the guesswork — and the risk — out of how your business actually uses AI.</p>
           <p class="price">from $900</p>
-          <a class="btn btn--dark" href="#" data-nav-intent="register-protocol">Secure your team</a>
+          <a class="btn btn--dark" href="#" data-nav-intent="register-protocol">HELP ME WITH MY AI POLICY</a>
         </article>
 
         <article class="door door--advisory">
@@ -1138,31 +1138,33 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   const NAV_INTENTS = {
     services: {
       note: '→ You clicked Services',
-      reply: "Our core services are:\n\nAI Visibility Audit — $300 · See what AI currently says about your business\nAI Visibility Build — from $2,000 · Structural work so AI finds and recommends you\nCustom AI Use Protocol — $900 · Safe AI practices and data rules for your team\nAI Opportunity Audit — $1,500 · Full workflow review with a prioritised action plan\n\nWhich one's closest to what you need?"
+      reply: "Our core services are:\n\nGenCheck — $300 · Our AI Visibility Audit to see what AI currently says about your business and exploring the plan to improve on that\nGenGrid — from $2,000 · Our AI Visibility Build: Comprehensive Structural work so AIs find and recommend you\nLiveAsk — from $2,000 · Your own custom AI guiding your site visitors and answering their questions about your business prompting them towards providing contact details in lieu of filling in a form\nPromptGuide — $900 · Your Custom AI Use Protocol. Safe AI practices and data rules for your team\nPromptSpec — $1,500 · An AI Opportunity Audit of your whole business. Full workflow review with a prioritised action plan\n\nWhich service do you want to find out more about?"
     },
     about: {
-      note: '→ You clicked About',
-      reply: "PromptWorkx tackles the real AI issues businesses actually face — not just theory.\n\nWe help you get found and recommended by AI (ChatGPT, Google AI, Gemini, Claude, Perplexity, not just Google search), and now you can put LiveAsk on your own site to convert that traffic into real leads.\n\nWe also help with AI use policy and adoption strategy — and our AI Tips page has more on what's genuinely worth your time.\n\nWhat's most relevant to you right now?"
+      note: "→ You clicked 'About'",
+      reply: "PromptWorkx has a unique take on AI adoption. We believe in helping you grow and build your business, not just shave costs. Our strategy prioritizes Two Pillars:\n\n1. Get you seen\n2. Get you leads",
+      linkText: "Click here for our full 'About' section",
+      linkHref: "#about"
     },
     contact: {
       note: '→ You clicked Contact',
       reply: "Thank you for requesting contact from us.\nMay we start with your name please?"
     },
     'book-audit': {
-      note: '→ You clicked Book an Audit',
-      reply: "I see you'd like to book an AI Visibility Audit.\nThank you for enquiring, may I have your name please?"
+      note: '→ You clicked Book a GenCheck',
+      reply: "I see you'd like to discuss your AI Visibility.\nThank you for enquiring, may I have your name and your business name please?"
     },
     'enquire-build': {
       note: '→ You clicked Enquire',
-      reply: "I see you're interested in an AI Visibility Build.\nThank you for enquiring, may I have your name please?"
+      reply: "Thank you for enquiring about GenGrid, may I have your name and business name please?"
     },
     'register-protocol': {
-      note: '→ You clicked Register interest',
-      reply: "I see you'd like to register interest in the Custom AI Use Protocol.\nThank you for enquiring, may I have your name please?"
+      note: '→ You clicked HELP ME WITH MY AI POLICY',
+      reply: "I see you'd like to learn more about PromptGuide and developing a Custom AI Use Protocol.\nThank you for enquiring, may I have your name and business name please?"
     },
     'enquire-opportunity': {
-      note: '→ You clicked Enquire about an audit',
-      reply: "I see you're interested in the AI Opportunity Audit.\nThank you for enquiring, may I have your name please?"
+      note: '→ You clicked Get an Assessment',
+      reply: "I see you're interested in PromptSpec and exploring an AI roadmap for your organisation.\nThank you for enquiring, may I have your name and business name please?"
     }
   };
   document.querySelectorAll('[data-nav-intent]').forEach(function(el){
@@ -1194,6 +1196,18 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       a.className = 'ask-msg ai';
       a.innerHTML = '<span class="who">PromptWorkx</span><p></p>';
       a.querySelector('p').textContent = cfg.reply;
+      // Optional real, genuinely clickable link — a separate element, not
+      // text smuggled inside cfg.reply (which renders as inert plain text
+      // via textContent). Only fires when a config entry actually supplies
+      // linkText/linkHref; every other nav-intent reply is untouched.
+      if (cfg.linkText && cfg.linkHref) {
+        const linkPara = document.createElement('p');
+        const link = document.createElement('a');
+        link.href = cfg.linkHref;
+        link.textContent = cfg.linkText;
+        linkPara.appendChild(link);
+        a.appendChild(linkPara);
+      }
       thread.appendChild(a);
       thread.scrollTop = thread.scrollHeight;
 
