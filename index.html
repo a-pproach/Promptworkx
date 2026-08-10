@@ -334,7 +334,7 @@ header nav a.nav-buy:hover img{opacity:.75}
   .hero .wrap,
   .proof .wrap{padding-left:180px}
 }
-.hero{background:var(--paper);color:var(--ink);padding:28px 0 56px;border-bottom:1px solid var(--line)}
+.hero{background:var(--paper);color:var(--ink);padding:28px 0 16px;border-bottom:1px solid var(--line)}
 .hero .eyebrow{color:var(--maroon)}
 .hero h1{font-size:clamp(3rem,8vw,5.6rem);font-weight:800;margin:14px 0 22px;max-width:18ch;color:var(--navy)}
 .hero h1 em{font-style:normal;color:var(--maroon)}
@@ -375,7 +375,7 @@ header nav a.nav-buy:hover img{opacity:.75}
 .pitch strong{color:var(--ink)}
 
 /* ── Services: three doors ──────────── */
-.services{padding:72px 0;background:#F1F0EB;border-top:1px solid var(--line)}
+.services{padding:20px 0 10px;background:#F1F0EB;border-top:1px solid var(--line)}
 .services h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 8px}
 .services .sub{color:var(--ink-soft);max-width:58ch;margin-bottom:40px}
 .doors{display:flex;flex-direction:column;gap:26px}
@@ -417,6 +417,8 @@ header nav a.nav-buy:hover img{opacity:.75}
 .pillar-logo{height:38px;width:auto;display:block}
 .pillar-logo--liveask{height:53px}
 .pillar .worry{font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;color:var(--maroon);margin-bottom:10px}
+.header-worry{margin:0;flex:1;text-align:center;display:none;font-size:.72rem}
+.standalone-worry{display:block;font-size:.78rem}
 .pillar--liveask .worry{color:var(--logo-blue)}
 .pillar>p{color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:10px 0 20px}
 .ways-list{list-style:none;color:var(--ink-soft);font-size:1rem;max-width:64ch;margin:0 0 20px;padding:0}
@@ -424,10 +426,10 @@ header nav a.nav-buy:hover img{opacity:.75}
 .ways-list li::before{content:"–";position:absolute;left:0;color:var(--navy)}
 .emphasis-blue{color:var(--logo-blue)}
 .line-burgundy,.line-burgundy strong{color:var(--maroon)}
-.term-link{color:var(--logo-blue);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;cursor:pointer}
+.term-link{color:var(--logo-blue);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;cursor:pointer;background:none;border:none;padding:0;font:inherit}
 .pillar .price{font-family:var(--display);font-weight:700;font-size:1.25rem;color:var(--charcoal);display:block;margin:14px 0 20px}
 .cta-tag{font-style:italic;color:var(--ink-soft);margin:0 0 16px}
-.tap-hint{color:var(--logo-blue-deep);font-weight:700;font-size:.95rem;letter-spacing:.02em}
+.pillar>p.tap-hint{color:var(--logo-blue);font-weight:700;font-size:.95rem;letter-spacing:.02em}
 .pillar .price small{font-size:.85rem;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;display:block;margin-top:4px}
 .pillar--liveask{border-top-color:var(--navy)}
 
@@ -440,6 +442,14 @@ header nav a.nav-buy:hover img{opacity:.75}
 .step--gengrid{border:3px solid var(--maroon);border-radius:6px}
 .step--gengrid .stepname{color:var(--maroon)}
 .step--genguard{border-top:3px solid var(--genguard-muted)}
+@media (max-width: 1023px){
+  /* On mobile the three steps stack vertically — GenGrid's own full box
+     border already provides clear separation below it, making GenGuard's
+     separate top border immediately redundant right there. Desktop's
+     side-by-side layout doesn't have this adjacency problem, so left
+     untouched there. */
+  .step--genguard{border-top:none}
+}
 .step--genguard .stepname{color:var(--genguard-muted)}
 .step-price{font-family:var(--display);font-weight:800;font-size:1.3rem;color:var(--ink);margin:14px 0 10px}
 
@@ -458,8 +468,9 @@ header nav a.nav-buy:hover img{opacity:.75}
 /* ── Advisory Services — lighter-touch, deliberately lower visual weight
    than the Two Pillars above, matched amber pair, not differentiated
    from each other ── */
-.advisory{padding:56px 0;background:#F1F0EB;border-top:1px solid var(--line)}
+.advisory{padding:10px 0 36px;background:#F1F0EB;border-top:1px solid var(--line)}
 .advisory .eyebrow{color:var(--amber);font-size:1.1rem}
+.advisory-eyebrow{text-align:center}
 .advisory h2{font-size:clamp(1.6rem,3.6vw,2.2rem);color:var(--navy);margin:10px 0 8px}
 .advisory .sub{color:var(--ink-soft);max-width:60ch;margin-bottom:30px}
 .worry--section{font-family:var(--display);font-size:1.15rem;color:var(--navy);margin:8px 0 14px;max-width:50ch}
@@ -511,6 +522,22 @@ blockquote footer{margin-top:14px;font-family:var(--mono);font-size:.8rem;letter
 footer.site{background:#0A1420;color:#7E8FA3;padding:26px 0;font-size:.85rem}
 footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
+/* ── "Generative AIs" term-explainer modal — 10 August 2026 ──
+   Extracted and adapted from genai-term-modal.html. Colours swapped to
+   the site's real variables (--charcoal, --logo-blue) rather than the
+   mockup's own local #0057FF, matching the trigger text and everything
+   else blue on the page. */
+.scrim{display:none;position:fixed;inset:0;background:rgba(34,34,34,.55);align-items:center;justify-content:center;padding:20px;z-index:1000}
+.scrim.open{display:flex}
+.modal{background:#EAF2FB;border-radius:14px;max-width:480px;width:100%;padding:32px 32px 28px;position:relative;box-shadow:0 20px 60px rgba(34,34,34,.25)}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:var(--paper);color:var(--charcoal);font-size:18px;cursor:pointer;line-height:1}
+.modal-close:hover{background:var(--line)}
+.modal-eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2E8B57;margin:0 0 8px}
+.modal h3{font-size:22px;margin:0 0 16px;color:#0057FF}
+.modal p{font-size:15px;line-height:1.65;color:var(--ink-soft);margin:0 0 14px}
+.modal p:last-of-type{margin-bottom:0}
+.modal strong{color:var(--charcoal)}
+
 /* ── Desktop-only condensing, 10 August 2026 ──
    On wide screens the nav row and the LiveAsk panel were spanning the full
    1080px .wrap edge-to-edge, forcing far more left-right eye travel than
@@ -553,7 +580,13 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   .pillar > p.slight-gap{margin-top:8px}
   /* More breathing room between the GenSeen logo and the rotating
      AI-names gif beside it, desktop only. */
-  #genseen-pillar .pillar-head{gap:20px}
+  #genseen-pillar .pillar-head{gap:20px;justify-content:center}
+  /* This inline-vs-standalone worry line swap is desktop-only, per
+     Chris's explicit correction — mobile keeps its own standalone
+     version, unaffected by any of this. */
+  .header-worry{display:block}
+  .standalone-worry{display:none}
+  .mobile-break{display:none}
   /* Same treatment applied to LiveAsk's pillar — widen/center its
      paragraphs and give the logo/button row the same breathing room
      as GenSeen's logo/gif row. */
@@ -628,7 +661,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
             <img src="/ai-names-rotate.gif" alt="ChatGPT, Gemini, Google AI, Claude, Perplexity" class="ai-names-gif">
           </div>
           <p class="worry">"Can customers find us when they ask AI?"</p>
-          <p class="line-burgundy tight-below"><span class="term-link">"Generative AIs"</span> — ChatGPT, Gemini, Claude, Google AI, Perplexity — ARE the new 'search engines'.</p>
+          <p class="line-burgundy tight-below">"<button type="button" class="term-link" id="genai-term-trigger">Generative AIs</button>" — ChatGPT, Gemini, Claude, Google AI, Perplexity — ARE the new 'search engines'.</p>
           <p class="narrow-below">The rules have changed.<br>What worked before in finding your website via 'search' is vastly different to how AIs actually conduct a search.</p>
           <p class="slight-gap">That's what our <span class="prefix">Gen</span><span class="emphasis-blue">Seen</span> suite is all about.</p>
           <p class="tight-below">Making sure your business <strong>IS</strong> "<span class="emphasis-blue">Seen</span>" by "Generative AIs"</p>
@@ -660,9 +693,10 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
         <article class="pillar pillar--liveask" id="liveask-pillar">
           <div class="pillar-head">
             <img src="/LiveAsk.gif" alt="LiveAsk" class="pillar-logo pillar-logo--liveask">
+            <p class="worry header-worry">"A website's job — get visitors to act.<br>Most never do."</p>
             <a href="/liveask/?demo=custom-ai" class="btn-green">Make LiveAsk<br><strong>YOUR</strong> website AI</a>
           </div>
-          <p class="worry">"Every website exists to get a visitor to act.<br>Most have quietly never actually managed it."</p>
+          <p class="worry standalone-worry">"A website's job — get visitors to act.<br>Most never do."</p>
           <p>That's what a call to action actually is — the one moment a site earns its purpose.<br>Yet for decades, most sites have failed it in the same three ways...</p>
           <ul class="ways-list">
             <li>Hoping someone finds the phone number, then dials it.</li>
@@ -681,7 +715,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 
   <section class="advisory" id="advisory">
     <div class="wrap">
-      <p class="eyebrow eyebrow--dark">Promptworkx Advisory Services</p>
+      <p class="eyebrow eyebrow--dark advisory-eyebrow">Promptworkx<br class="mobile-break">Advisory Services</p>
       <p class="worry worry--section">"Two questions every AI-using business eventually has to answer — most don't know who to ask."</p>
       <p class="sub">Advisory Services covers what sits behind both — whether your team is actually using AI safely, and where AI should take your business next.<br>Each one is a single, focused engagement, not an open-ended program:<br>a straight, expert answer to a question no template can give you.</p>
       <div class="doors">
@@ -826,6 +860,17 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       </div>
     </div>
   </section>
+
+<div class="scrim" id="genai-modal">
+  <div class="modal">
+    <button type="button" class="modal-close" id="genai-modal-close" aria-label="Close">&#10005;</button>
+    <p class="modal-eyebrow">Quick explainer</p>
+    <h3>What is "Generative AI"?</h3>
+    <p>A generative AI reads a question and <strong>writes a direct, specific answer on the spot</strong> — it doesn't just hand you a list of links the way a traditional search engine does.</p>
+    <p>That's the real shift: a search engine points people toward pages that might have the answer. A generative AI <strong>decides what to say about your business itself</strong>, using whatever information it can find and trust.</p>
+    <p>Which is exactly what <span class="prefix">Gen</span><span class="emphasis-blue">Seen</span> exists to get right — making sure that when it decides, what it says about you is accurate, complete, and puts you forward, not a competitor.</p>
+  </div>
+</div>
 
 </main>
 
@@ -1050,6 +1095,31 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   // this reads the query, scrolls to the panel, and submits it through the
   // exact same tested pipeline as if the visitor had typed it themselves —
   // same lead capture, same verification flow, nothing new to maintain.
+  // "Generative AIs" term-explainer modal — 10 August 2026.
+  // Converted from the mockup's inline onclick handlers to proper
+  // addEventListener-based ones. Also added: click on the darkened
+  // background (not the modal itself) closes it, and Escape closes it —
+  // standard modal behaviour, not in the original mockup, added since
+  // we'd just discussed keyboard/screen-reader accessibility directly.
+  (function genAiModal(){
+    const trigger = document.getElementById('genai-term-trigger');
+    const modal = document.getElementById('genai-modal');
+    const closeBtn = document.getElementById('genai-modal-close');
+    if (!trigger || !modal || !closeBtn) return;
+
+    function openModal(){ modal.classList.add('open'); }
+    function closeModal(){ modal.classList.remove('open'); }
+
+    trigger.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){
+      if (e.target === modal) closeModal(); // clicked the scrim itself, not the card
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+  })();
+
   (function handleSearchActionDeepLink(){
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q');
