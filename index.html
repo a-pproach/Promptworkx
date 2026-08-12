@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PromptWorkx — AI Visibility Consulting, Brisbane | Get Found in AI Searches</title>
-<meta name="description" content="Brisbane AI Visibility consulting. Chris Carroll shows business owners exactly what ChatGPT, Gemini and Google AI say about them — and fixes it. AI Visibility Audits, Custom AI Use Protocols and AI Opportunity Audits.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>PromptWorkx — AI Visibility Consulting, Brisbane</title>
+<meta name="description" content="Brisbane AI Visibility consulting. See what ChatGPT, Gemini and Google AI say about your business — then fix it with GenCheck, GenGrid and GenGuard.">
 <meta property="og:title" content="PromptWorkx — AI Visibility Consulting, Brisbane">
 <meta property="og:description" content="Your customers are asking AI who to use. I show Brisbane businesses exactly what AI says about them — and make sure it's right.">
 <meta property="og:type" content="website">
@@ -49,6 +52,52 @@
         "https://www.crunchbase.com/organization/promptworkx",
         "https://abr.business.gov.au/ABN/View?id=81716061314"
       ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "PromptWorkx AI Visibility & Conversion Suite",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": { "@id": "https://promptworkx.com/#genseen" }
+          },
+          {
+            "@type": "Offer",
+            "price": "300",
+            "priceCurrency": "AUD",
+            "itemOffered": { "@id": "https://promptworkx.com/#visibility-audit" }
+          },
+          {
+            "@type": "Offer",
+            "price": "2000",
+            "priceCurrency": "AUD",
+            "itemOffered": { "@id": "https://promptworkx.com/#visibility-build" }
+          },
+          {
+            "@type": "Offer",
+            "price": "600",
+            "priceCurrency": "AUD",
+            "itemOffered": { "@id": "https://promptworkx.com/#genguard" }
+          },
+          {
+            "@type": "Offer",
+            "price": "2000",
+            "priceCurrency": "AUD",
+            "itemOffered": { "@id": "https://promptworkx.com/#liveask-service" }
+          },
+          {
+            "@type": "Offer",
+            "price": "900",
+            "priceCurrency": "AUD",
+            "itemOffered": { "@id": "https://promptworkx.com/#ai-protocol" }
+          },
+          {
+            "@type": "Offer",
+            "price": "1500",
+            "priceCurrency": "AUD",
+            "itemOffered": { "@id": "https://promptworkx.com/#opportunity-audit" }
+          }
+        ]
+      },
       "potentialAction": {
         "@type": "InteractAction",
         "target": {
@@ -86,10 +135,23 @@
       ]
     },
     {
+      "@type": "SoftwareApplication",
+      "@id": "https://promptworkx.com/#genseen",
+      "name": "GenSeen",
+      "alternateName": "GenSeen AI Visibility Platform",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All (Web-based)",
+      "description": "PromptWorkx's AI Visibility platform — the complete generative engine optimisation suite comprising GenCheck (audit), GenGrid (implementation) and GenGuard (ongoing protection).",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      }
+    },
+    {
       "@type": "Service",
       "@id": "https://promptworkx.com/#visibility-audit",
-      "name": "AI Visibility Audit",
-      "description": "A live audit showing exactly what AI systems say about your business today, whether you're recommended, and who's being named instead.",
+      "name": "GenCheck",
+      "isPartOf": { "@id": "https://promptworkx.com/#genseen" },
+      "description": "A live, evidence-based diagnostic of how AI systems currently represent a business — what's said, who's recommended in its place, and exactly why.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -106,8 +168,9 @@
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#visibility-build",
-      "name": "AI Visibility Build",
-      "description": "The structural work that helps AI systems find, understand and correctly recommend a business, plus ongoing management as the AI landscape shifts.",
+      "name": "GenGrid",
+      "isPartOf": { "@id": "https://promptworkx.com/#genseen" },
+      "description": "The structural machine-layer work — schema, entity consistency, structured data — that helps AI systems find, understand and correctly recommend a business.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -125,8 +188,8 @@
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#ai-protocol",
-      "name": "Custom AI Use Protocol",
-      "description": "A staff practice review and written protocol covering safe AI use, data rules and no-go zones for a business whose team is already using AI tools unsupervised.",
+      "name": "PromptGuide",
+      "description": "A custom AI Use Protocol built around how a business's team actually uses AI, not a generic template — covering safe use, data rules and no-go zones.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -143,8 +206,8 @@
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#opportunity-audit",
-      "name": "AI Opportunity Audit",
-      "description": "An end-to-end workflow review identifying where AI, including agentic tools and automation, genuinely earns its keep in a business, delivered as a prioritised plain-English action plan.",
+      "name": "PromptSpec",
+      "description": "A deliberately scoped assessment mapping where AI genuinely earns its keep across a business's operations, delivered as a plain-English action plan.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -157,6 +220,76 @@
         "price": "1500",
         "priceCurrency": "AUD"
       }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://promptworkx.com/#genguard",
+      "name": "GenGuard",
+      "isPartOf": { "@id": "https://promptworkx.com/#genseen" },
+      "description": "Ongoing share-of-voice tracking and protection against AI drift, so a fixed AI-visibility problem doesn't quietly reappear.",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Australia"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "600",
+        "priceCurrency": "AUD",
+        "billingIncrement": "1",
+        "description": "From $600/month, ongoing."
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://promptworkx.com/#liveask-service",
+      "name": "LiveAsk",
+      "description": "A real-time AI conversation engine embedded on a website, answering visitor questions in context and capturing qualified leads as the natural outcome of that conversation.",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Australia"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "2000",
+        "priceCurrency": "AUD",
+        "description": "From $2,000 setup, plus ongoing optimisation from $600/month."
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://promptworkx.com/#liveask-agent",
+      "name": "LiveAsk",
+      "alternateName": "LiveAsk AI Conversation Engine",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All (Web-based)",
+      "description": "An interactive AI conversation and qualification engine embedded on PromptWorkx client websites, designed to engage visitors in real time, answer questions, and capture structured lead intent.",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "CommunicateAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://promptworkx.com/liveask/?demo=custom-ai",
+          "actionPlatform": [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/MobileWebPlatform"
+          ]
+        },
+        "description": "Interact directly with the LiveAsk AI agent to query services or start a real-time conversation."
+      },
+      "featureList": [
+        "Real-time AI visitor qualification",
+        "Domain-scoped conversation, no off-topic drift",
+        "Instant SMS notification routing",
+        "No-app QR code mobile chat initiation"
+      ]
     },
     {
       "@type": "WebSite",
