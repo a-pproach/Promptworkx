@@ -1414,5 +1414,14 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
   }
 })();
 </script>
+<script>
+// Registers sw.js — exists only to satisfy Chrome's installability check for
+// a clean, badge-free home-screen icon. The service worker itself does no
+// caching (see sw.js) — this registration call is separate from, and does
+// not touch, the LiveAsk panel script above.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+</script>
 </body>
 </html>
