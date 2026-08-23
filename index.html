@@ -13,6 +13,7 @@
 <meta property="og:description" content="Your customers are asking AI who to use. We show Brisbane businesses exactly what AI says about them — and make sure it's right.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://promptworkx.com">
+<link rel="canonical" href="https://promptworkx.com/">
   <!-- ============ STRUCTURED DATA (JSON-LD) — Organization, Founder, Services, FAQ ============ -->
   <script type="application/ld+json">
 {
@@ -315,14 +316,6 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What happens in a GenCheck session?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "I run the questions your customers are already asking — about your business, your trade, your area — live, in front of you, across the AI systems people actually use. You see exactly what's said, whether you're named at all, and who's being recommended instead. No slides, no theory — your real business, live on screen."
-          }
-        },
-        {
-          "@type": "Question",
           "name": "Do I need to understand AI to work with you?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -553,6 +546,7 @@ header nav a.nav-buy:hover img{opacity:.75}
 .btn-green{background:#2E8B57;color:#fff;font-family:var(--body);font-size:1.15rem;line-height:1.25;font-weight:700;text-align:center;text-decoration:none;padding:10px 16px;border-radius:4px;display:inline-block}
 .pillar-logo{height:38px;width:auto;display:block}
 .pillar-logo--liveask{height:53px}
+.pillar-title{display:contents}
 .pillar .worry{font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;color:var(--maroon);margin-bottom:10px}
 .header-worry{margin:0;flex:1;text-align:center;display:none;font-size:.72rem}
 .standalone-worry{display:block;font-size:.78rem}
@@ -637,6 +631,19 @@ header nav a.nav-buy:hover img{opacity:.75}
 .faqitem{background:#fff;border:1px solid var(--line);padding:24px 26px}
 .faqitem h3{font-family:var(--body);text-transform:none;letter-spacing:normal;font-size:1.15rem;font-weight:600;color:var(--navy);margin-bottom:8px;line-height:1.3}
 .faqitem p{color:var(--ink-soft);font-size:.98rem;margin:0}
+
+/* GenCheck methodology section — added 21 August 2026, sits between
+   Advisory Services and the proof section, per agreed placement. */
+.stepgrid-more{margin-top:18px;font-size:.9rem;color:var(--ink-soft)}
+.stepgrid-more a{color:var(--logo-blue);font-weight:600;text-decoration:underline}
+.gencheck-method{padding:72px 0;background:var(--paper);border-top:1px solid var(--line)}
+.gencheck-method h2{font-size:clamp(2rem,5vw,3rem);color:var(--navy);margin:12px 0 34px;max-width:20ch}
+.method-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:78ch}
+.method-step{background:#fff;border:1px solid var(--line);padding:24px 26px}
+.method-step .step-num{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--maroon)}
+.method-step h3{font-family:var(--body);text-transform:none;letter-spacing:normal;font-size:1.15rem;font-weight:600;color:var(--navy);margin:6px 0 8px;line-height:1.3}
+.method-step p{color:var(--ink-soft);font-size:.98rem;margin:0}
+.method-close{max-width:78ch;margin-top:24px;color:var(--ink-soft);font-size:.98rem;font-style:italic}
 
 /* ── Testimonials ───────────────────── */
 .quotes{padding:72px 0;background:#F1F0EB;border-top:1px solid var(--line)}
@@ -795,7 +802,7 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 
         <article class="pillar" id="genseen-pillar">
           <div class="pillar-head">
-            <img src="/genseen-logo.png" alt="GenSeen" class="pillar-logo">
+            <h2 class="pillar-title"><img src="/genseen-logo.png" alt="GenSeen" class="pillar-logo"></h2>
             <img src="/ai-names-rotate.gif" alt="ChatGPT, Gemini, Google AI, Claude, Perplexity" class="ai-names-gif">
           </div>
           <p class="worry">"Can customers find us when they ask AI?"</p>
@@ -826,11 +833,12 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
               <p class="step-price">From $600/month</p>
             </div>
           </div>
+          <p class="stepgrid-more"><a href="#gencheck-method">See exactly what happens in a GenCheck →</a></p>
         </article>
 
         <article class="pillar pillar--liveask" id="liveask-pillar">
           <div class="pillar-head">
-            <img src="/LiveAsk.gif" alt="LiveAsk" class="pillar-logo pillar-logo--liveask">
+            <h2 class="pillar-title"><img src="/LiveAsk.gif" alt="LiveAsk" class="pillar-logo pillar-logo--liveask"></h2>
             <p class="worry header-worry">"A website's job — get visitors to act.<br>Most never do."</p>
             <a href="/liveask/?demo=custom-ai" class="btn-green">Make LiveAsk<br><strong>YOUR</strong> website AI</a>
           </div>
@@ -876,6 +884,31 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
         </article>
 
       </div>
+    </div>
+  </section>
+
+  <section class="gencheck-method" id="gencheck-method">
+    <div class="wrap">
+      <p class="eyebrow">GenCheck · The process</p>
+      <h2>What happens in a GenCheck?</h2>
+      <div class="method-steps">
+        <div class="method-step">
+          <p class="step-num">1</p>
+          <h3>We see what AI is saying</h3>
+          <p>We test the kinds of questions potential customers ask when looking for a business like yours. You see whether you're being found, how you're being described and who is appearing instead.</p>
+        </div>
+        <div class="method-step">
+          <p class="step-num">2</p>
+          <h3>We investigate what's helping — or getting in the way</h3>
+          <p>We look beyond the answers to identify the issues affecting your AI visibility and representation. That lets us distinguish between simply being absent and having something specific that needs attention.</p>
+        </div>
+        <div class="method-step">
+          <p class="step-num">3</p>
+          <h3>You get a clear baseline and priorities</h3>
+          <p>We bring the findings together into an evidence-based picture of where you stand now: what's working, where the important gaps are and what should be addressed next.</p>
+        </div>
+      </div>
+      <p class="method-close">GenCheck gives us a baseline we can return to after improvements are made, so progress can be measured rather than assumed.</p>
     </div>
   </section>
 
@@ -935,11 +968,6 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
       <p class="eyebrow eyebrow--dark">Questions</p>
       <h2>Plain answers, no sales pitch</h2>
       <div class="faqlist">
-
-        <article class="faqitem">
-          <h3>What happens in a GenCheck session?</h3>
-          <p>I run the questions your customers are already asking — about your business, your trade, your area — live, in front of you, across the AI systems people actually use. You see exactly what's said, whether you're named at all, and who's being recommended instead. No slides, no theory — your real business, live on screen.</p>
-        </article>
 
         <article class="faqitem">
           <h3>Do I need to understand AI to work with you?</h3>
