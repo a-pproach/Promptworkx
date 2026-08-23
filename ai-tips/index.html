@@ -6,12 +6,14 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
 <title>AI Tips — PromptWorkx</title>
 <meta name="description" content="Can you trust your AI? Real evidence on AI accuracy, plus practical AI tips from PromptWorkx founder Chris Carroll.">
-<meta property="og:title" content="PromptWorkx — AI Visibility Consulting, Brisbane">
-<meta property="og:description" content="Your customers are asking AI who to use. I show Brisbane businesses exactly what AI says about them — and make sure it's right.">
+<meta property="og:title" content="AI Tips — PromptWorkx">
+<meta property="og:description" content="Your customers are asking AI who to use. We show Brisbane businesses exactly what AI says about them — and make sure it's right.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://promptworkx.com">
+<meta property="og:url" content="https://promptworkx.com/ai-tips/">
+<link rel="canonical" href="https://promptworkx.com/ai-tips/">
   <!-- ============ STRUCTURED DATA (JSON-LD) — Organization, Founder, Services, FAQ ============ -->
   <script type="application/ld+json">
 {
@@ -21,8 +23,18 @@
       "@type": "ProfessionalService",
       "@id": "https://promptworkx.com/#organization",
       "name": "PromptWorkx",
+      "legalName": "PromptWorkx",
+      "logo": "https://promptworkx.com/assets/promptworkx-primary-logo.png",
       "description": "PromptWorkx helps Australian businesses get found, correctly represented and recommended by AI systems including Google AI, ChatGPT, Gemini, Claude and Perplexity. Founded by Chris Carroll in Brisbane, services include AI Visibility Audits and structural fixes, Custom AI Use Protocols, and AI Opportunity Audits.",
       "url": "https://promptworkx.com",
+      "taxID": "81716061314",
+      "vatID": "AU81716061314",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Brisbane",
+        "addressRegion": "QLD",
+        "addressCountry": "AU"
+      },
       "founder": {
         "@id": "https://promptworkx.com/#chris-carroll"
       },
@@ -36,8 +48,72 @@
       },
       "priceRange": "$300-$2000+",
       "sameAs": [
-        "https://www.linkedin.com/in/chris-carroll-610376277/"
+        "https://www.linkedin.com/in/chris-carroll-610376277/",
+        "https://www.linkedin.com/company/142995041",
+        "https://www.wikidata.org/wiki/Q140914555",
+        "https://www.crunchbase.com/organization/promptworkx",
+        "https://abr.business.gov.au/ABN/View?id=81716061314"
       ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "PromptWorkx AI Visibility & Conversion Suite",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#genseen"
+            }
+          },
+          {
+            "@type": "Offer",
+            "price": "300",
+            "priceCurrency": "AUD",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#visibility-audit"
+            }
+          },
+          {
+            "@type": "Offer",
+            "price": "2000",
+            "priceCurrency": "AUD",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#visibility-build"
+            }
+          },
+          {
+            "@type": "Offer",
+            "price": "600",
+            "priceCurrency": "AUD",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#genguard"
+            }
+          },
+          {
+            "@type": "Offer",
+            "price": "2000",
+            "priceCurrency": "AUD",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#liveask-service"
+            }
+          },
+          {
+            "@type": "Offer",
+            "price": "900",
+            "priceCurrency": "AUD",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#ai-protocol"
+            }
+          },
+          {
+            "@type": "Offer",
+            "price": "1500",
+            "priceCurrency": "AUD",
+            "itemOffered": {
+              "@id": "https://promptworkx.com/#opportunity-audit"
+            }
+          }
+        ]
+      },
       "potentialAction": {
         "@type": "InteractAction",
         "target": {
@@ -55,6 +131,7 @@
       "@type": "Person",
       "@id": "https://promptworkx.com/#chris-carroll",
       "name": "Chris Carroll",
+      "alternateName": "Christopher DC",
       "jobTitle": "Founder, AI Visibility Consultant",
       "description": "Brisbane-based founder of PromptWorkx, an AI Visibility consultancy. Also known professionally as Christopher DC, an Australian singer-songwriter.",
       "worksFor": {
@@ -63,14 +140,36 @@
       "url": "https://promptworkx.com",
       "sameAs": [
         "https://www.linkedin.com/in/chris-carroll-610376277/",
-        "https://christopherdc.com.au/#artist"
+        "https://christopherdc.com.au/#artist",
+        "https://www.wikidata.org/wiki/Q140915098",
+        "https://open.spotify.com/artist/5cufZRrSCZVToSJOj68mpA",
+        "https://music.apple.com/au/artist/christopher-dc/6785141048",
+        "https://www.youtube.com/@ChristopherDCmusic",
+        "https://www.instagram.com/christopherdcmusic",
+        "https://www.tiktok.com/@christopherdcmusic",
+        "https://www.facebook.com/christopherdcmusic"
       ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://promptworkx.com/#genseen",
+      "name": "GenSeen",
+      "alternateName": "GenSeen AI Visibility Platform",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All (Web-based)",
+      "description": "PromptWorkx's AI Visibility platform — the complete generative engine optimisation suite comprising GenCheck (audit), GenGrid (implementation) and GenGuard (ongoing protection).",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      }
     },
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#visibility-audit",
-      "name": "AI Visibility Audit",
-      "description": "A live audit showing exactly what AI systems say about your business today, whether you're recommended, and who's being named instead.",
+      "name": "GenCheck",
+      "isPartOf": {
+        "@id": "https://promptworkx.com/#genseen"
+      },
+      "description": "A live, evidence-based diagnostic of how AI systems currently represent a business — what's said, who's recommended in its place, and exactly why.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -87,8 +186,11 @@
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#visibility-build",
-      "name": "AI Visibility Build",
-      "description": "The structural work that helps AI systems find, understand and correctly recommend a business, plus ongoing management as the AI landscape shifts.",
+      "name": "GenGrid",
+      "isPartOf": {
+        "@id": "https://promptworkx.com/#genseen"
+      },
+      "description": "The structural machine-layer work — schema, entity consistency, structured data — that helps AI systems find, understand and correctly recommend a business.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -106,8 +208,8 @@
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#ai-protocol",
-      "name": "Custom AI Use Protocol",
-      "description": "A staff practice review and written protocol covering safe AI use, data rules and no-go zones for a business whose team is already using AI tools unsupervised.",
+      "name": "PromptGuide",
+      "description": "A custom AI Use Protocol built around how a business's team actually uses AI, not a generic template — covering safe use, data rules and no-go zones.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -124,8 +226,8 @@
     {
       "@type": "Service",
       "@id": "https://promptworkx.com/#opportunity-audit",
-      "name": "AI Opportunity Audit",
-      "description": "An end-to-end workflow review identifying where AI, including agentic tools and automation, genuinely earns its keep in a business, delivered as a prioritised plain-English action plan.",
+      "name": "PromptSpec",
+      "description": "A deliberately scoped assessment mapping where AI genuinely earns its keep across a business's operations, delivered as a plain-English action plan.",
       "provider": {
         "@id": "https://promptworkx.com/#organization"
       },
@@ -138,6 +240,78 @@
         "price": "1500",
         "priceCurrency": "AUD"
       }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://promptworkx.com/#genguard",
+      "name": "GenGuard",
+      "isPartOf": {
+        "@id": "https://promptworkx.com/#genseen"
+      },
+      "description": "Ongoing share-of-voice tracking and protection against AI drift, so a fixed AI-visibility problem doesn't quietly reappear.",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Australia"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "600",
+        "priceCurrency": "AUD",
+        "billingIncrement": "1",
+        "description": "From $600/month, ongoing."
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://promptworkx.com/#liveask-service",
+      "name": "LiveAsk",
+      "description": "A real-time AI conversation engine embedded on a website, answering visitor questions in context and capturing qualified leads as the natural outcome of that conversation.",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Australia"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "2000",
+        "priceCurrency": "AUD",
+        "description": "From $2,000 setup, plus ongoing optimisation from $600/month."
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://promptworkx.com/#liveask-agent",
+      "name": "LiveAsk",
+      "alternateName": "LiveAsk AI Conversation Engine",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All (Web-based)",
+      "description": "An interactive AI conversation and qualification engine embedded on PromptWorkx client websites, designed to engage visitors in real time, answer questions, and capture structured lead intent.",
+      "provider": {
+        "@id": "https://promptworkx.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "CommunicateAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://promptworkx.com/liveask/?demo=custom-ai",
+          "actionPlatform": [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/MobileWebPlatform"
+          ]
+        },
+        "description": "Interact directly with the LiveAsk AI agent to query services or start a real-time conversation."
+      },
+      "featureList": [
+        "Real-time AI visitor qualification",
+        "Domain-scoped conversation, no off-topic drift",
+        "Instant SMS notification routing",
+        "No-app QR code mobile chat initiation"
+      ]
     },
     {
       "@type": "WebSite",
@@ -158,54 +332,30 @@
     },
     {
       "@type": "FAQPage",
-      "@id": "https://promptworkx.com/#faq",
+      "@id": "https://promptworkx.com/ai-tips/#faq",
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What actually happens in an AI Visibility Audit?",
+          "name": "I turned a bedroom into a vocal booth by showing AI a video of it",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "I run the questions your customers are already asking — about your business, your trade, your area — live, in front of you, across the AI systems people actually use. You see exactly what's said, whether you're named at all, and who's being recommended instead. No slides, no theory — your real business, live on screen."
+            "text": "No measurements, no words — just a phone walkthrough of the room. It worked out the acoustics from that alone: mattress against one wall, doona over the window, even mic placement. Recorded a full acoustic guitar take that same night."
           }
         },
         {
           "@type": "Question",
-          "name": "Do I need to understand AI to work with you?",
+          "name": "I turned an awkward video into a polished written answer",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. Most people I work with have never opened ChatGPT. That's fine — this isn't about learning a tool, it's about understanding what a tool already says about you. Everything's explained in plain English, and you walk away knowing exactly where you stand, not with homework."
+            "text": "Asked to send an intro video and knowing I'm not polished on camera, I recorded it anyway, ran it through AI for a transcript, then had another AI give me a tip on how to present better. Solved in minutes, not months of practice."
           }
         },
         {
           "@type": "Question",
-          "name": "How is this different from SEO?",
+          "name": "Stuck on a site or a form? Screenshot it, hand it to AI",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "SEO gets you ranked in a list of links. This is about something newer: when someone asks an AI system a question directly and it gives one answer, not ten — is your business the one it names? That's a different, growing part of how customers find businesses now, and most SEO work doesn't touch it at all."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you only work with Brisbane businesses?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "I'm based in Brisbane and that's where my own proof of work comes from, but the service itself runs entirely live over video — so I work with businesses across Australia. Where you're based doesn't change what AI systems say about you, or how it gets fixed."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What if the audit finds nothing wrong?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Then you'll know that for certain, instead of guessing — and that's genuinely useful too. I'm not going to manufacture a problem to sell you a fix. If your business is already well represented, I'll tell you so."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly will this change what AI says about my business?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Some things move within weeks. Others — particularly showing up when someone asks a general question without naming your business — take longer and depend on building genuine, ongoing presence, not a single fix. I'll always tell you honestly which is which, rather than promising a timeline I can't back up."
+            "text": "The one I actually do most: rather than hunting for instructions, take a screen capture of whatever's confusing and ask AI to walk through it. Works for almost anything — including photographing your fridge and pantry to get a real recipe out of what's actually there."
           }
         }
       ]
@@ -417,6 +567,9 @@ blockquote footer{margin-top:14px;font-family:var(--mono);font-size:.8rem;letter
 .contact .ctas{display:flex;gap:14px;flex-wrap:wrap}
 footer.site{background:#0A1420;color:#7E8FA3;padding:26px 0;font-size:.85rem}
 footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer.site .footer-links{justify-content:center;gap:20px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line-dark)}
+footer.site .footer-links a{color:#7E8FA3;text-decoration:none;font-size:.85rem}
+footer.site .footer-links a:hover{color:#fff}
 @media (min-width: 1024px){
   header .wrap{max-width:700px}
   .ask-panel .wrap{max-width:700px}
@@ -497,6 +650,11 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
 </main>
 
 <footer class="site">
+  <div class="wrap footer-links">
+    <a href="/about/">About PromptWorkx</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Use</a>
+  </div>
   <div class="wrap">
     <span>© 2026 PromptWorkx · Brisbane, Australia</span>
     <span>Practical AI for Real Business Results</span>
@@ -884,6 +1042,15 @@ footer.site .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:
     micBtn.style.display = 'none'; // graceful fallback — just type instead
   }
 })();
+</script>
+<script>
+// Registers sw.js — exists only to satisfy Chrome's installability check for
+// a clean, badge-free home-screen icon. The service worker itself does no
+// caching (see sw.js) — this registration call is separate from, and does
+// not touch, the LiveAsk panel script above.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
 </script>
 </body>
 </html>
