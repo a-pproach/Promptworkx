@@ -224,7 +224,9 @@
   // selector, so a destination added there needs a matching entry here
   // before it can actually move anyone's page.
   const TOUR_DESTINATION_SELECTORS = {
-    LIVEASK_SECTION: '#liveask-pillar'
+    LIVEASK_SECTION: '#liveask-pillar',
+    GENSEEN_SECTION: '#genseen-pillar',
+    ABOUT_SECTION: '#about'
   };
 
   // Executes the Worker's GO_TO action — smooth-scrolls to the destination
