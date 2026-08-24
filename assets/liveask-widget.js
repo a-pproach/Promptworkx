@@ -242,7 +242,17 @@
     if (!selector) return;
     const el = document.querySelector(selector);
     if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Real live-test find (24 August 2026): the ask panel is pinned
+    // (position: sticky) at the top of the viewport at all times — a plain
+    // scrollIntoView({block:'start'}) aligns the destination's top edge
+    // with the viewport's top edge, which is exactly where the panel
+    // already sits, so the destination lands hidden behind it. Read the
+    // panel's own CURRENT rendered height (varies by viewport width and
+    // whether it's expanded) rather than a fixed guess, and scroll to just
+    // below it with a little breathing room.
+    const panelHeight = askPanel.getBoundingClientRect().height;
+    const targetTop = el.getBoundingClientRect().top + window.scrollY - panelHeight - 16;
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
     const prev = { transition: el.style.transition, outline: el.style.outline, outlineOffset: el.style.outlineOffset };
     el.style.transition = 'outline-color 0.3s ease';
     el.style.outline = '3px solid #1e6fd9';
