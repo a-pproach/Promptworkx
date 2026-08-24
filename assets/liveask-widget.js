@@ -352,8 +352,49 @@
   // only thing that actually clears any of this is a real page reload,
   // which resets the JS variables themselves — nothing in this button
   // does that.
-  document.getElementById('askCloseBtn').addEventListener('click', function(){
+  //
+  // ---- Hide/reopen discoverability (added 24 August 2026, direct request
+  // from Chris after live-testing found this a genuine gap) ----
+  // Two small additions, both injected here as self-contained CSS/DOM
+  // rather than edited into each page's own <style> block or markup, so
+  // this stays a single-file change: a quiet hint next to the X while the
+  // panel is open explaining what it does, and a small tab that appears
+  // once the panel has actually been closed at least once, giving a
+  // visible way back in. was-closed is deliberately never removed again
+  // once set — that's fine, since it only ever matters in combination with
+  // :not(.expanded), i.e. it only shows the tab while collapsed.
+  const uxStyle = document.createElement('style');
+  uxStyle.textContent = '.ask-close-hint{display:none;position:absolute;bottom:20px;right:46px;font:500 11px/1.2 inherit;color:#8a94a3;white-space:nowrap;pointer-events:none}'
+    + '.ask-box.expanded .ask-close-hint{display:block}'
+    + '.ask-reopen-tab{display:none;position:absolute;right:14px;bottom:-15px;background:#1e6fd9;color:#fff;font:600 12px/1 inherit;padding:7px 14px;border:none;border-radius:0 0 12px 12px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.15);z-index:5}'
+    + '.ask-reopen-tab:hover{background:#175bb5}'
+    + '.ask-box.was-closed:not(.expanded) .ask-reopen-tab{display:block}';
+  document.head.appendChild(uxStyle);
+
+  const closeBtn = document.getElementById('askCloseBtn');
+  const closeHint = document.createElement('span');
+  closeHint.className = 'ask-close-hint';
+  closeHint.textContent = 'You can hide this chat panel';
+  closeBtn.insertAdjacentElement('beforebegin', closeHint);
+
+  const reopenTab = document.createElement('button');
+  reopenTab.type = 'button';
+  reopenTab.className = 'ask-reopen-tab';
+  reopenTab.textContent = 'Reopen chat';
+  document.querySelector('.ask-box').appendChild(reopenTab);
+  reopenTab.addEventListener('click', function(){
+    document.querySelector('.ask-box').classList.add('expanded');
+    if (conversationHistory.length > 0) thread.classList.add('active');
+    autoFocusPending = true;
+    input.blur();
+    requestAnimationFrame(function(){
+      input.focus({ preventScroll: true }); // real paint gap before refocus
+    });
+  });
+
+  closeBtn.addEventListener('click', function(){
     document.querySelector('.ask-box').classList.remove('expanded');
+    document.querySelector('.ask-box').classList.add('was-closed');
     thread.classList.remove('active');
   });
 
