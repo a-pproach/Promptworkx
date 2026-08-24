@@ -453,6 +453,12 @@ header nav a.nav-buy:hover img{opacity:.75}
 .ask-msg.ai p{color:var(--ink-soft)}
 .ask-msg.ai .ask-privacynotice{font-size:.82rem;font-style:italic;color:var(--ink-soft);opacity:.85;margin:0 0 8px;white-space:normal}
 .ask-msg.ai .ask-privacynotice a{color:var(--maroon);text-decoration:underline}
+/* Quick Replies (Customer 000 / GEO 4, added 24 August 2026) — model-offered
+   closed-choice buttons, distinct from NAV_INTENTS' fixed CTA buttons above
+   (.btn--primary etc.) and from Governed Actions; see submitToPanel(). */
+.ask-quickreplies{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
+.ask-quickreply-btn{font:inherit;font-size:.86rem;line-height:1.3;color:var(--navy);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.ask-quickreply-btn:hover{background:var(--logo-blue);border-color:var(--logo-blue);color:#fff}
 .ask-thinking{font-family:var(--mono);font-size:.78rem;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
 .ask-sysnote{text-align:center;font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:6px 0 14px;opacity:.85}
 
@@ -830,6 +836,46 @@ footer.site .footer-links a:hover{color:#fff}
     return !conversationHistory.some(function(m){ return m.role === 'assistant'; });
   }
 
+  // ---- Quick Replies (Customer 000 / GEO 4, added 24 August 2026) ----
+  // Renders the model's offered closed-choice buttons (data.quickReplies —
+  // see system-prompt.js "Guided (closed) questions — Quick Replies" and
+  // Section 8). Distinct from NAV_INTENTS: a Quick Reply click is ordinary
+  // conversational input, not a fixed opener — it goes back through the
+  // exact same submitToPanel() path as if the visitor had typed the
+  // button's own text, and can lead to a normal Claude reply (including
+  // another round of Quick Replies, or none). Also distinct from Governed
+  // Actions (lead capture, verification) — selecting a choice never itself
+  // triggers a consequential action, only ordinary conversation input.
+  function buildQuickRepliesEl(choices){
+    const wrap = document.createElement('div');
+    wrap.className = 'ask-quickreplies';
+    choices.forEach(function(choice){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ask-quickreply-btn';
+      btn.textContent = choice;
+      btn.addEventListener('click', function(){
+        wrap.remove(); // one-shot — once answered, don't leave it clickable again
+        submitToPanel(choice, { showVisitorBubble: true });
+      });
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  }
+
+  // Defensive client-side re-validation of data.quickReplies — the Worker
+  // already validates strictly (system-prompt.js Section 8 / index-worker.js),
+  // but never trust a network response blindly for something rendered as
+  // clickable UI. Same fail-closed rule as the backend: anything invalid
+  // here just means no Quick Reply row renders, never a broken one.
+  function validQuickReplies(data){
+    if (!Array.isArray(data.quickReplies)) return [];
+    return data.quickReplies
+      .filter(function(c){ return typeof c === 'string' && c.trim().length > 0 && c.trim().length <= 40; })
+      .map(function(c){ return c.trim(); })
+      .slice(0, 4);
+  }
+
   // Shared core — both manual typing and nav-triggered prompts flow through
   // this single, already-tested path. `showVisitorBubble` controls whether
   // the actual prompt text renders as a "You" bubble (real typed messages)
@@ -904,6 +950,10 @@ footer.site .footer-links a:hover{color:#fff}
           a.insertBefore(buildPrivacyNoticeEl(), replyP);
         }
         replyP.textContent = replyText;
+        const quickReplyChoices = validQuickReplies(data);
+        if (quickReplyChoices.length > 0) {
+          a.appendChild(buildQuickRepliesEl(quickReplyChoices));
+        }
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
         // Real fix, 7 August 2026: the async reply lands well after the
