@@ -151,7 +151,7 @@
   }
   function saveSession(){
     try {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId: sessionId, conversationHistory: conversationHistory }));
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId: sessionId, conversationHistory: conversationHistory, tourToken: tourToken }));
     } catch (e) {
       // Storage unavailable or full (private-browsing modes, quota) — the
       // conversation still works fine for this page, it just won't survive
@@ -160,8 +160,28 @@
   }
 
   const restoredSession = loadSession();
-  let sessionId = (restoredSession && restoredSession.sessionId) || ('web-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8));
-  let conversationHistory = (restoredSession && restoredSession.conversationHistory) || [];
+
+  // ---- Custom AI Tours: guest entry (added 24 August 2026) ----
+  // A tour link always carries ?tour=<token> (see TOUR_DESTINATIONS /
+  // handleTourCreate in index-worker.js — the guest link is literally
+  // `${ALLOWED_ORIGIN}/?tour=<token>`). If this URL's token doesn't match
+  // whatever tour token (if any) this same browser tab already had stored,
+  // treat it as a brand new tour visit and start completely fresh — a tour
+  // guest should never have an unrelated earlier conversation in this tab
+  // silently merged into their tour.
+  const urlTourToken = new URLSearchParams(window.location.search).get('tour');
+  const isFreshTourEntry = !!urlTourToken && (!restoredSession || restoredSession.tourToken !== urlTourToken);
+
+  let sessionId, conversationHistory, tourToken;
+  if (isFreshTourEntry) {
+    sessionId = 'web-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    conversationHistory = [];
+    tourToken = urlTourToken;
+  } else {
+    sessionId = (restoredSession && restoredSession.sessionId) || ('web-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8));
+    conversationHistory = (restoredSession && restoredSession.conversationHistory) || [];
+    tourToken = (restoredSession && restoredSession.tourToken) || null;
+  }
 
   // Rebuilds the visible thread from a restored conversationHistory after a
   // same-tab page navigation, so arriving on the new page shows the
@@ -196,8 +216,108 @@
     thread.scrollTop = thread.scrollHeight;
   }
 
-  if (restoredSession && conversationHistory.length > 0) {
+  // ---- Custom AI Tours: guest-side action dispatcher (added 24 August
+  // 2026) ----
+  // Approved semantic destination names -> real on-page targets. Keep this
+  // in sync with TOUR_DESTINATIONS in index-worker.js — the Worker only
+  // ever sends a semantic name (e.g. "LIVEASK_SECTION"), never a raw
+  // selector, so a destination added there needs a matching entry here
+  // before it can actually move anyone's page.
+  const TOUR_DESTINATION_SELECTORS = {
+    LIVEASK_SECTION: '#liveask-pillar'
+  };
+
+  // Executes the Worker's GO_TO action — smooth-scrolls to the destination
+  // and gives it a brief highlight so it's obvious to the guest why the
+  // page just moved. Plain inline styles rather than a CSS class, so this
+  // stays fully self-contained in this one file rather than needing a
+  // matching class added to every page's stylesheet. Fails completely
+  // silently on an unknown destination name or a page that doesn't have
+  // that element (e.g. GO_TO firing while the guest is somewhere the
+  // target genuinely isn't present) — never breaks the reply that came
+  // with it.
+  function handleTourAction(action){
+    if (!action || action.type !== 'GO_TO') return;
+    const selector = TOUR_DESTINATION_SELECTORS[action.target];
+    if (!selector) return;
+    const el = document.querySelector(selector);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const prev = { transition: el.style.transition, outline: el.style.outline, outlineOffset: el.style.outlineOffset };
+    el.style.transition = 'outline-color 0.3s ease';
+    el.style.outline = '3px solid #1e6fd9';
+    el.style.outlineOffset = '4px';
+    setTimeout(function(){
+      el.style.outline = prev.outline;
+      el.style.outlineOffset = prev.outlineOffset;
+      el.style.transition = prev.transition;
+    }, 2600);
+  }
+
+  // A tour guest's very first load: no conversation to replay yet, and the
+  // ordinary rotating placeholder ("Ask PromptWorkx AI" / "Am I visible to
+  // ChatGPT?" etc.) makes no sense for someone who arrived via a tour link,
+  // not organically — fetch and show the fixed greeting instead (see
+  // buildTourGreeting in index-worker.js). No Claude call happens for this
+  // specific request; the Worker returns the greeting immediately.
+  function beginTourEntry(){
+    document.querySelector('.ask-box').classList.add('expanded');
+    thread.classList.add('active');
+    clearInterval(rotateTimer); rotateTimer = null;
+    clearTimeout(rotateFadeTimeout);
+    setFinalPlaceholder();
+    ph.classList.remove('fade');
+
+    const thinking = document.createElement('p');
+    thinking.className = 'ask-thinking';
+    thinking.textContent = 'PromptWorkx is thinking…';
+    thread.appendChild(thinking);
+    thread.scrollTop = thread.scrollHeight;
+
+    fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sessionId: sessionId, messages: [], tourToken: tourToken })
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        thinking.remove();
+        const replyText = data.reply || "Welcome! Something went wrong setting up your tour — try refreshing, or just ask a question below.";
+        const showPrivacyNotice = isFirstAiReply();
+        conversationHistory.push({ role: 'assistant', content: replyText });
+        saveSession();
+        const a = document.createElement('div');
+        a.className = 'ask-msg ai';
+        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        const replyP = a.querySelector('p');
+        if (showPrivacyNotice) {
+          a.insertBefore(buildPrivacyNoticeEl(), replyP);
+        }
+        replyP.textContent = replyText;
+        thread.appendChild(a);
+        thread.scrollTop = thread.scrollHeight;
+        if (data.action) handleTourAction(data.action);
+        autoFocusPending = true;
+        input.blur();
+        requestAnimationFrame(function(){
+          input.focus({ preventScroll: true }); // real paint gap before refocus
+        });
+      })
+      .catch(function(){
+        thinking.remove();
+        const a = document.createElement('div');
+        a.className = 'ask-msg ai';
+        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        a.querySelector('p').textContent = "That's taking longer than it should to load your tour — try refreshing, or just ask a question below.";
+        thread.appendChild(a);
+        thread.scrollTop = thread.scrollHeight;
+      });
+  }
+
+  if (conversationHistory.length > 0) {
     replaySession();
+  } else if (tourToken) {
+    beginTourEntry();
   } else {
     startRotation();
   }
@@ -358,7 +478,7 @@
     fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: sessionId, messages: conversationHistory })
+      body: JSON.stringify({ sessionId: sessionId, messages: conversationHistory, tourToken: tourToken })
     })
       .then(function(res){ return res.json(); })
       .then(function(data){
@@ -388,6 +508,12 @@
         }
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
+        // Custom AI Tours: only ever present on a tour guest's turn, and
+        // only on the specific turn the Worker's guest-state-machine
+        // decided to fire it (see handleTourAction above and the guest
+        // state machine in index-worker.js's fetch()) — undefined/absent
+        // on every ordinary reply, so this is a no-op there.
+        if (data.action) handleTourAction(data.action);
         // Real fix, 7 August 2026: the async reply lands well after the
         // earlier submit-time refocus, and appending it here is a real DOM
         // mutation that can reset the caret blink a second time — same
