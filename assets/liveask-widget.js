@@ -217,31 +217,67 @@
   }
 
   // ---- Custom AI Tours: guest-side action dispatcher (added 24 August
-  // 2026) ----
+  // 2026; extended 25 August 2026 for real cross-page destinations) ----
   // Approved semantic destination names -> real on-page targets. Keep this
   // in sync with TOUR_DESTINATIONS in index-worker.js — the Worker only
   // ever sends a semantic name (e.g. "LIVEASK_SECTION"), never a raw
   // selector, so a destination added there needs a matching entry here
-  // before it can actually move anyone's page.
+  // before it can actually move anyone's page. Each entry now carries
+  // `page` (the real site path it lives on) alongside `selector` — until 25
+  // August 2026 every destination lived on the homepage, so this was a bare
+  // selector string; now a destination can point at a genuinely different
+  // page, which needs a full navigation, not just a scroll.
   const TOUR_DESTINATION_SELECTORS = {
-    LIVEASK_SECTION: '#liveask-pillar',
-    GENSEEN_SECTION: '#genseen-pillar',
-    ABOUT_SECTION: '#about'
+    LIVEASK_SECTION: { page: '/', selector: '#liveask-pillar' },
+    GENSEEN_SECTION: { page: '/', selector: '#genseen-pillar' },
+    ABOUT_SECTION: { page: '/', selector: '#about' },
+    // Added 25 August 2026 — the first real cross-page destination, direct
+    // request from Chris to prove page-hopping actually works. Lands on the
+    // dedicated LiveAsk page's hero section (new id added there).
+    LIVEASK_PAGE_HERO: { page: '/liveask', selector: '#liveask-page-hero' }
   };
 
-  // Executes the Worker's GO_TO action — smooth-scrolls to the destination
-  // and gives it a brief highlight so it's obvious to the guest why the
-  // page just moved. Plain inline styles rather than a CSS class, so this
-  // stays fully self-contained in this one file rather than needing a
-  // matching class added to every page's stylesheet. Fails completely
-  // silently on an unknown destination name or a page that doesn't have
-  // that element (e.g. GO_TO firing while the guest is somewhere the
-  // target genuinely isn't present) — never breaks the reply that came
-  // with it.
-  function handleTourAction(action){
-    if (!action || action.type !== 'GO_TO') return;
-    const selector = TOUR_DESTINATION_SELECTORS[action.target];
-    if (!selector) return;
+  // Same "treat home specially" normalization as ABOUT_HREF above, reused
+  // here to compare a destination's configured `page` against where the
+  // guest actually is right now. '/' and '/index.html' are the same place;
+  // everything else compares as its own literal path with any trailing
+  // slash stripped, so '/liveask' and '/liveask/' count as the same page.
+  function normalizedCurrentPath(){
+    const p = window.location.pathname;
+    if (p === '/' || p === '/index.html') return '/';
+    return p.replace(/\/$/, '');
+  }
+  function normalizedDestPage(page){
+    if (page === '/' || page === '/index.html') return '/';
+    return page.replace(/\/$/, '');
+  }
+
+  // Persists across the hard navigation a cross-page GO_TO needs — a real
+  // page load destroys this whole script's running state, so "there's a
+  // scroll-and-highlight still owed once we land" has to survive in
+  // sessionStorage, same storage already relied on for cross-page
+  // conversation continuity (SESSION_KEY above). Cleared the moment it's
+  // been carried out, or on any first-contact tour ping starting fresh, so
+  // a stale pending action can never fire on the wrong page later.
+  const PENDING_ACTION_KEY = 'liveask_pending_tour_action_v1';
+  function savePendingTourAction(target){
+    try { sessionStorage.setItem(PENDING_ACTION_KEY, JSON.stringify({ target: target })); } catch (e) { /* ignore, same fail-silent rule as saveSession */ }
+  }
+  function takePendingTourAction(){
+    try {
+      const raw = sessionStorage.getItem(PENDING_ACTION_KEY);
+      if (!raw) return null;
+      sessionStorage.removeItem(PENDING_ACTION_KEY);
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed.target === 'string') ? parsed.target : null;
+    } catch (e) { return null; }
+  }
+
+  // The actual same-page scroll-and-highlight — unchanged from the original
+  // 24 August version, just split out so both the same-page path below AND
+  // the "just landed after a cross-page hop" resume path (see near the
+  // bottom of this file) can call the identical, already-tested logic.
+  function scrollAndHighlight(selector){
     const el = document.querySelector(selector);
     if (!el) return;
     // Real live-test find (24 August 2026): the ask panel is pinned
@@ -264,6 +300,29 @@
       el.style.outlineOffset = prev.outlineOffset;
       el.style.transition = prev.transition;
     }, 2600);
+  }
+
+  // Executes the Worker's GO_TO action. Fails completely silently on an
+  // unknown destination name (never breaks the reply that came with it) —
+  // same principle as the original same-page-only version.
+  function handleTourAction(action){
+    if (!action || action.type !== 'GO_TO') return;
+    const dest = TOUR_DESTINATION_SELECTORS[action.target];
+    if (!dest) return;
+    if (normalizedDestPage(dest.page) === normalizedCurrentPath()) {
+      scrollAndHighlight(dest.selector);
+      return;
+    }
+    // Cross-page destination (added 25 August 2026): the explanation text
+    // accompanying this same action has already been delivered in this
+    // same reply, so nothing more needs saying — just remember what's
+    // still owed, then navigate. sessionStorage (not the in-memory
+    // conversationHistory push, which already happened by this point)
+    // carries the pending scroll-and-highlight across the reload; the
+    // resume check near the bottom of this file picks it up once the new
+    // page's own copy of this script starts running.
+    savePendingTourAction(action.target);
+    window.location.href = dest.page;
   }
 
   // A tour guest's very first load: no conversation to replay yet, and the
@@ -342,6 +401,34 @@
   } else {
     startRotation();
   }
+
+  // ---- Cross-page GO_TO resume (added 25 August 2026) ----
+  // The other half of handleTourAction's cross-page branch above: a
+  // pending action was stashed in sessionStorage right before the
+  // navigation that brought us to THIS page load. If one is sitting there
+  // and its destination's page matches where we actually are now, carry
+  // out the scroll-and-highlight it was always meant to do — same
+  // function, same visual result as an in-page GO_TO, just fired after a
+  // real page load instead of a same-page reply. A short delay lets the
+  // page's own layout (images, fonts, anything above the target that
+  // shifts height on load) settle before measuring positions — the
+  // in-page path never needed this since nothing above the target moves
+  // mid-conversation, but a fresh page load can still be reflowing right
+  // after DOMContentLoaded.
+  //
+  // Any mismatch — no pending action, unknown target, or a pending
+  // action whose page doesn't match here (shouldn't happen, but a
+  // guest could always intervene by hand) — is a silent no-op, same
+  // fail-quiet rule as the rest of this dispatcher. Read once via
+  // takePendingTourAction() itself, so a stale flag can never fire twice.
+  (function(){
+    const pendingTarget = takePendingTourAction();
+    if (!pendingTarget) return;
+    const dest = TOUR_DESTINATION_SELECTORS[pendingTarget];
+    if (!dest) return;
+    if (normalizedDestPage(dest.page) !== normalizedCurrentPath()) return;
+    setTimeout(function(){ scrollAndHighlight(dest.selector); }, 300);
+  })();
 
   // "About" nav-intent needs a different link target depending on which
   // page it's clicked from — "#about" when already on the homepage,
