@@ -306,6 +306,15 @@
           a.insertBefore(buildPrivacyNoticeEl(), replyP);
         }
         replyP.textContent = replyText;
+        // Real gap found 25 August 2026: this greeting path never rendered
+        // data.quickReplies at all (only submitToPanel's success handler
+        // did) — so the Worker's new fixed "Start tour" button silently had
+        // nowhere to go, leaving the guest to type "yes" regardless. Same
+        // validated, one-shot Quick Reply rendering as everywhere else.
+        const quickReplyChoices = validQuickReplies(data);
+        if (quickReplyChoices.length > 0) {
+          a.appendChild(buildQuickRepliesEl(quickReplyChoices));
+        }
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
         if (data.action) handleTourAction(data.action);
