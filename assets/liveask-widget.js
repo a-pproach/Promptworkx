@@ -132,12 +132,30 @@
       ph.classList.remove('fade');
     }
   });
-  // Auto-focus on landing so the real cursor blinks immediately. Note: some
-  // mobile browsers (notably iOS Safari) restrict or ignore programmatic
-  // focus without a genuine user gesture first — this may not reliably open
-  // the keyboard or show a caret on every device. Worth confirming on real
-  // hardware, not assuming universal behaviour.
+  // Auto-focus on landing so the real cursor blinks immediately — desktop
+  // only. Real bug found live on mobile, 25 August 2026 (Jolene's tour
+  // link): this used to run unconditionally on every page load, phone or
+  // not. On a touch device that queues the on-screen keyboard to open the
+  // instant the page finishes loading — often not even visibly firing
+  // until later, once page layout/scrolling settles (Android was seen
+  // popping the keyboard exactly when the tour's first scroll-to-stop
+  // animation ran, well after the actual focus() call). A tour guest
+  // landing on a personalised link is never expected to type immediately;
+  // neither, really, is an ordinary visitor just arriving on their phone.
+  // (pointer: coarse) is the standard, UA-sniff-free way to detect a
+  // touch-primary device — skip the auto-focus there entirely. Desktop
+  // (pointer: fine, no on-screen keyboard to disturb) keeps the original
+  // courteous cursor-ready-on-landing touch, unchanged.
+  //
+  // IMPORTANT — this ONLY ever gates this one script-triggered focus() call
+  // on page load. A visitor's own genuine tap into the input still opens
+  // the keyboard exactly as any text field always does on any device —
+  // that's native browser behaviour, entirely separate from this code, and
+  // nothing here touches it (see the 'click' listener above, which only
+  // reveals the panel and never blocks or replaces the browser's own
+  // focus-on-tap handling).
   window.addEventListener('load', function(){
+    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
     input.blur();
     requestAnimationFrame(function(){
       input.focus({ preventScroll: true }); // real paint gap before refocus — back-to-back blur/focus can get coalesced by the browser with no gap between them
