@@ -607,8 +607,27 @@
       btn.className = 'ask-quickreply-btn';
       btn.textContent = choice;
       btn.addEventListener('click', function(){
-        wrap.remove(); // one-shot — once answered, don't leave it clickable again
+        // Real bug found live on mobile, 25 August 2026: this used to call
+        // wrap.remove() immediately, synchronously, right here. That's a
+        // problem now that the document-level click-outside-to-collapse
+        // listener exists (see it further down) — removing wrap detaches
+        // the very button that was just clicked from the page BEFORE this
+        // same click event finishes bubbling up to that listener. By the
+        // time the listener asks "was this click inside #ask-panel?", the
+        // clicked button has no path up to #ask-panel any more (it's still
+        // attached to wrap, but wrap itself is now detached from
+        // everything), so the check wrongly says "no" and collapses the
+        // panel — right as the normal post-submit refocus pops the mobile
+        // keyboard back open. Net effect on a phone: every quick-reply tap
+        // looked like "the panel slams shut and the keyboard pops up".
+        // Fix: disable the buttons immediately (so a genuine accidental
+        // double-tap still can't submit twice — same guarantee as before),
+        // but defer the actual DOM removal to the next tick, after this
+        // click has fully finished bubbling and the outside-click check has
+        // already correctly seen it as "inside the panel".
+        Array.prototype.forEach.call(wrap.querySelectorAll('button'), function(b){ b.disabled = true; });
         submitToPanel(choice, { showVisitorBubble: true });
+        setTimeout(function(){ wrap.remove(); }, 0);
       });
       wrap.appendChild(btn);
     });
