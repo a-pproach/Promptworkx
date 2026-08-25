@@ -425,11 +425,14 @@
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
         if (data.action) handleTourAction(data.action);
-        autoFocusPending = true;
-        input.blur();
-        requestAnimationFrame(function(){
-          input.focus({ preventScroll: true }); // real paint gap before refocus
-        });
+        // Real bug found live on mobile, 25 August 2026: this used to
+        // force-focus the text input the instant a guest's tour greeting
+        // landed — before they'd tapped or typed anything at all. On a
+        // phone that meant the keyboard shot open the moment the tour
+        // page finished loading, with nothing to type yet. Removed, same
+        // reasoning as the nav-intent handler and the quick-reply path in
+        // submitToPanel above — only a genuine typed submission should
+        // pull the keyboard back open.
       })
       .catch(function(){
         thinking.remove();
@@ -712,11 +715,22 @@
     // that immediately undid it, so the cursor never actually stayed
     // visible long enough to be seen. Moved to after every synchronous
     // mutation in this function completes.
-    autoFocusPending = true;
-    input.blur();
-    requestAnimationFrame(function(){
-      input.focus({ preventScroll: true }); // real paint gap before refocus — back-to-back blur/focus can get coalesced by the browser with no gap between them
-    });
+    // Real bug found live on mobile, 25 August 2026: this refocus used to
+    // be unconditional — meaning it ran even when this turn came from a
+    // quick-reply BUTTON tap, not typed text. Focusing a text input is
+    // exactly what pops a phone's on-screen keyboard, so a visitor who'd
+    // only ever tapped buttons kept getting the keyboard shoved open at
+    // them for no reason. Now only opted into by the actual typed-message
+    // path (send(), via opts.refocusInput) — a quick-reply choice never
+    // asked for a keyboard, so it no longer summons one. See the matching
+    // gates further down in this function's success/catch handlers.
+    if (opts.refocusInput) {
+      autoFocusPending = true;
+      input.blur();
+      requestAnimationFrame(function(){
+        input.focus({ preventScroll: true }); // real paint gap before refocus — back-to-back blur/focus can get coalesced by the browser with no gap between them
+      });
+    }
 
     // The real PIN goes to the server in THIS one request only, spliced
     // back in on top of a copy of conversationHistory (which itself only
@@ -771,12 +785,16 @@
         // mutation that can reset the caret blink a second time — same
         // underlying browser behaviour as the rotation-text issue, just
         // triggered later in the flow. Refocus again once the reply is
-        // actually in.
-        autoFocusPending = true;
-        input.blur();
-        requestAnimationFrame(function(){
-          input.focus({ preventScroll: true }); // real paint gap before refocus
-        });
+        // actually in. Gated the same way as the submit-time refocus above
+        // (25 August 2026) — same reasoning: don't summon the phone
+        // keyboard on the back of a quick-reply tap.
+        if (opts.refocusInput) {
+          autoFocusPending = true;
+          input.blur();
+          requestAnimationFrame(function(){
+            input.focus({ preventScroll: true }); // real paint gap before refocus
+          });
+        }
       })
       .catch(function(){
         thinking.remove();
@@ -786,11 +804,13 @@
         a.querySelector('p').textContent = "That's taking longer than it should — try again, or jump straight to a door below.";
         thread.appendChild(a);
         thread.scrollTop = thread.scrollHeight;
-        autoFocusPending = true;
-        input.blur();
-        requestAnimationFrame(function(){
-          input.focus({ preventScroll: true }); // real paint gap before refocus
-        });
+        if (opts.refocusInput) {
+          autoFocusPending = true;
+          input.blur();
+          requestAnimationFrame(function(){
+            input.focus({ preventScroll: true }); // real paint gap before refocus
+          });
+        }
       });
   }
 
@@ -799,7 +819,11 @@
     if(!q) return;
     input.value = '';
     input.style.height = 'auto';
-    submitToPanel(q, { showVisitorBubble: true });
+    // refocusInput: true — this is the one real "the visitor was just
+    // typing" path (see submitToPanel's own comment on the flag), so
+    // keeping the keyboard open/refocused here is the wanted behaviour,
+    // not the bug.
+    submitToPanel(q, { showVisitorBubble: true, refocusInput: true });
   }
 
   document.getElementById('askSend').addEventListener('click', send);
@@ -953,20 +977,14 @@
 
       setFinalPlaceholder();
       ph.classList.remove('fade');
-      // Real fix, 7 August 2026: this handler's refocus was already ordered
-      // correctly (after the DOM mutations above) — but scrollIntoView at
-      // the top uses smooth/animated scrolling, which keeps running for
-      // several hundred ms AFTER this synchronous code finishes. The still-
-      // completing scroll animation was resetting blink even though focus
-      // itself was set correctly. Delaying until the animation has actually
-      // finished, not just until our own code has run.
-      setTimeout(function(){
-        autoFocusPending = true;
-        input.blur();
-        requestAnimationFrame(function(){
-          input.focus({ preventScroll: true }); // real paint gap before refocus
-        });
-      }, 500);
+      // Real bug found live on mobile, 25 August 2026: this handler used to
+      // end with a forced refocus of the text input (see this file's git
+      // history / the PIN/quick-reply fix notes above for the fuller story)
+      // — but clicking a nav button (About/Services/Contact etc.) is a
+      // button tap, not typed text, and focusing a text input is exactly
+      // what pops a phone's on-screen keyboard. Removed outright rather
+      // than gated, since a nav-intent click is never the "visitor was
+      // just typing" case submitToPanel's refocusInput flag exists for.
     });
   });
 
