@@ -78,6 +78,22 @@
   // script-triggered focus must NOT fade the placeholder (visitors should
   // still see the rotating prompt suggestions) — only a genuine user tap
   // should trigger the fade. autoFocusPending tracks that distinction.
+  // ---- Reveal-on-interaction (added 25 August 2026, replaces the removed
+  // "Reopen chat" tab) ----
+  // Expands the panel to show what's already in conversationHistory — but
+  // ONLY when there's actually something to show. Real bug found testing
+  // this exact addition: .ask-close-btn is positioned absolute against
+  // .ask-box, and .ask-box only grows tall enough to fit it properly once
+  // .ask-thread.active has real content — expanding with zero history left
+  // a short box with the close button landing right on top of the send
+  // button. There's also nothing meaningful to "reveal" for a brand new
+  // visitor anyway — the rotating placeholder already is their experience.
+  function revealPanel(){
+    if (conversationHistory.length === 0) return;
+    document.querySelector('.ask-box').classList.add('expanded');
+    thread.classList.add('active');
+  }
+
   let autoFocusPending = true;
   input.addEventListener('focus', function(){
     if (autoFocusPending) {
@@ -92,8 +108,25 @@
       pauseRotation();
       clearInterval(rotateTimer); rotateTimer = null;
       clearTimeout(rotateFadeTimeout);
+      // Covers a genuinely NEW focus — e.g. tabbing into the field with a
+      // keyboard when it wasn't already focused. See the separate 'click'
+      // listener below for why this alone isn't enough.
+      revealPanel();
     }
   });
+  // Real bug found testing this exact addition (25 August 2026): the page
+  // auto-focuses the input on load (see the 'load' listener below), so by
+  // the time a real visitor actually clicks into it, it's usually ALREADY
+  // focused — and clicking an already-focused element fires no new 'focus'
+  // event at all, so the reveal logic above silently never ran on a plain
+  // click. Same root cause as the documented 7 August fix for rotation-
+  // stop below (input event vs. focus event) — a genuine 'click' fires
+  // every single time regardless of prior focus state, which 'focus'
+  // fundamentally cannot guarantee. autoFocusPending doesn't need
+  // checking here: the landing autofocus is triggered from script via
+  // input.focus(), never a real click, so this listener is naturally never
+  // reached by it.
+  input.addEventListener('click', revealPanel);
   input.addEventListener('blur', function(){
     if (input.value.length === 0) {
       ph.classList.remove('fade');
@@ -129,6 +162,14 @@
   });
 
   const WORKER_URL = 'https://ask-promptworkx.chriscarroll-promptworkx.workers.dev';
+
+  // ---- RA PIN masking (added 25 August 2026) ----
+  // Must match index-worker.js's own PIN_PROMPT_TEXT constant exactly —
+  // this is the one fixed string submitToPanel checks for to know "the
+  // very next thing typed is a PIN, not an ordinary message." See
+  // submitToPanel's own comment at the point this is used for the full
+  // picture of what does and doesn't get masked/stored/sent.
+  const PIN_PROMPT_TEXT = "Sure — what's your PIN?";
 
   // ---- Cross-page session persistence (added 24 August 2026, alongside
   // this file's consolidation) ----
@@ -183,14 +224,23 @@
     tourToken = (restoredSession && restoredSession.tourToken) || null;
   }
 
-  // Rebuilds the visible thread from a restored conversationHistory after a
-  // same-tab page navigation, so arriving on the new page shows the
-  // conversation continuing rather than looking like it vanished. Never
-  // auto-scrolls the visitor's viewport to do this — the panel is sticky
-  // near the top already, and forcing the page to jump on an ordinary nav
-  // click (no consent given, unlike a Guided Tour's explicit "Shall we
-  // start?") would be exactly the kind of unannounced page movement worth
-  // avoiding.
+  // Rebuilds the thread's DOM content from a restored conversationHistory
+  // after a same-tab page navigation or reload, so it's fully ready the
+  // instant the visitor actually opens the panel again — but does NOT
+  // open it itself. Redesigned 25 August 2026: the original version also
+  // force-expanded the panel here, which meant simply reloading the page
+  // (or navigating to another page) yanked the full conversation back into
+  // view even if the visitor had just closed it, with no chance to browse
+  // quietly. Remembering the conversation and deciding whether to SHOW it
+  // are now two separate concerns — content persists always; visibility
+  // only ever changes because of a real, deliberate action (focusing the
+  // input, sending a message, a defined nav trigger, or a fresh tour
+  // link — see each of those call sites for their own .expanded handling).
+  // Rotation still needs stopping and the placeholder still needs updating
+  // regardless of visibility, so a visitor who returns to a history-
+  // carrying tab never sees the "Ask PromptWorkx AI" rotating suggestions
+  // — they'd be wrong the moment there's already a real conversation on
+  // record, collapsed or not.
   function replaySession(){
     conversationHistory.forEach(function(m){
       if (m.role === 'user') {
@@ -207,8 +257,6 @@
         thread.appendChild(a);
       }
     });
-    thread.classList.add('active');
-    document.querySelector('.ask-box').classList.add('expanded');
     clearInterval(rotateTimer); rotateTimer = null;
     clearTimeout(rotateFadeTimeout);
     setFinalPlaceholder();
@@ -451,48 +499,53 @@
   // which resets the JS variables themselves — nothing in this button
   // does that.
   //
-  // ---- Hide/reopen discoverability (added 24 August 2026, direct request
-  // from Chris after live-testing found this a genuine gap) ----
-  // Two small additions, both injected here as self-contained CSS/DOM
-  // rather than edited into each page's own <style> block or markup, so
-  // this stays a single-file change: a quiet hint next to the X while the
-  // panel is open explaining what it does, and a small tab that appears
-  // once the panel has actually been closed at least once, giving a
-  // visible way back in. was-closed is deliberately never removed again
-  // once set — that's fine, since it only ever matters in combination with
-  // :not(.expanded), i.e. it only shows the tab while collapsed.
-  const uxStyle = document.createElement('style');
-  uxStyle.textContent = '.ask-close-hint{display:none;position:absolute;bottom:20px;right:46px;font:500 11px/1.2 inherit;color:#8a94a3;white-space:nowrap;pointer-events:none}'
-    + '.ask-box.expanded .ask-close-hint{display:block}'
-    + '.ask-reopen-tab{display:none;position:absolute;right:14px;bottom:-15px;background:#1e6fd9;color:#fff;font:600 12px/1 inherit;padding:7px 14px;border:none;border-radius:0 0 12px 12px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.15);z-index:5}'
-    + '.ask-reopen-tab:hover{background:#175bb5}'
-    + '.ask-box.was-closed:not(.expanded) .ask-reopen-tab{display:block}';
-  document.head.appendChild(uxStyle);
-
+  // ---- Open/close redesign (25 August 2026, replacing the 24 August
+  // "hide/reopen tab" pattern after real live-testing found it worse than
+  // no affordance at all) ----
+  // The 24 August version added a floating "Reopen chat" tab plus a hint
+  // label next to the X, specifically so a visitor who'd closed the panel
+  // had a visible way back in. Real testing surfaced three separate
+  // problems with it: the tab and hint collided/misaligned on both mobile
+  // and desktop; a page reload forced the FULL panel back open regardless
+  // of whether the visitor had just closed it (session persistence and
+  // panel VISIBILITY were wrongly tied together — see replaySession's own
+  // comment); and clicking an unrelated nav button reopened the whole
+  // conversation even when the visitor only wanted to browse elsewhere on
+  // the page.
+  //
+  // The actual fix, per Chris (25 August 2026): stop treating "closed" as
+  // a thing that needs its own dedicated escape hatch at all, and instead
+  // make opening/closing behave the way visitors already expect from any
+  // search-bar-like control on the web — focusing the input reveals what's
+  // already there (no separate button needed), and clicking anywhere else
+  // on the page puts it away again. The input bar itself, always visible
+  // regardless of open/closed state, IS the reopen affordance now. The X
+  // stays — "all windows deserve a good X" — just without the label that
+  // used to sit next to it and collide with it.
   const closeBtn = document.getElementById('askCloseBtn');
-  const closeHint = document.createElement('span');
-  closeHint.className = 'ask-close-hint';
-  closeHint.textContent = 'You can hide this chat panel';
-  closeBtn.insertAdjacentElement('beforebegin', closeHint);
-
-  const reopenTab = document.createElement('button');
-  reopenTab.type = 'button';
-  reopenTab.className = 'ask-reopen-tab';
-  reopenTab.textContent = 'Reopen chat';
-  document.querySelector('.ask-box').appendChild(reopenTab);
-  reopenTab.addEventListener('click', function(){
-    document.querySelector('.ask-box').classList.add('expanded');
-    if (conversationHistory.length > 0) thread.classList.add('active');
-    autoFocusPending = true;
-    input.blur();
-    requestAnimationFrame(function(){
-      input.focus({ preventScroll: true }); // real paint gap before refocus
-    });
-  });
 
   closeBtn.addEventListener('click', function(){
     document.querySelector('.ask-box').classList.remove('expanded');
-    document.querySelector('.ask-box').classList.add('was-closed');
+    thread.classList.remove('active');
+  });
+
+  // Click-outside-to-collapse. Only fires when the panel is actually open,
+  // and deliberately ignores two categories of "outside" click rather than
+  // collapsing on every single one: anything inside #ask-panel itself
+  // (the input, the thread, quick-reply buttons, the mic, the X — all
+  // legitimately part of using the panel, none of them should close it),
+  // and any of the site's own defined nav-intent triggers (About, Contact,
+  // etc. — see NAV_INTENTS below), which have their own click handler that
+  // deliberately OPENS the panel; without this exclusion, that handler's
+  // own expand and this listener's collapse would both fire on the same
+  // click and fight each other. Every other click on the page — page text,
+  // whitespace, a plain link that isn't a defined trigger — collapses it.
+  document.addEventListener('click', function(e){
+    const askBox = document.querySelector('.ask-box');
+    if (!askBox.classList.contains('expanded')) return;
+    if (e.target.closest('#ask-panel')) return;
+    if (e.target.closest('[data-nav-intent]')) return;
+    askBox.classList.remove('expanded');
     thread.classList.remove('active');
   });
 
@@ -592,11 +645,31 @@
       note.textContent = opts.systemNote;
       thread.appendChild(note);
     }
+
+    // ---- RA PIN masking (added 25 August 2026, real live-test find) ----
+    // Detected purely by checking whether the fixed, exact PIN-prompt text
+    // was the AI's most recent turn — deterministic, no guessing at intent,
+    // same "code decides, model never does" principle as everything else
+    // security-relevant in this flow. The real PIN still has to reach the
+    // server this one time (that's the whole point — the server is what
+    // actually checks it against a stored hash), but nothing else about it
+    // survives past this single request: the visible bubble shows a fixed
+    // mask instead of the digits (a FIXED mask, not one sized to the PIN's
+    // own length — a variable-length mask would leak how many digits it
+    // was), and conversationHistory — which gets saved into this browser's
+    // own sessionStorage AND resent in full on every later request — never
+    // holds the real value, not even for a moment. See index-worker.js's
+    // redactPinFromMessages for this same fix's backend half (a
+    // defense-in-depth backstop that doesn't rely on this file having done
+    // its part correctly).
+    const lastAiTurn = conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1] : null;
+    const isPinAnswer = !!lastAiTurn && lastAiTurn.role === 'assistant' && lastAiTurn.content === PIN_PROMPT_TEXT;
+
     if(opts.showVisitorBubble !== false){
       const v = document.createElement('div');
       v.className = 'ask-msg visitor';
       v.innerHTML = '<span class="who">You</span><p></p>';
-      v.querySelector('p').textContent = promptText;
+      v.querySelector('p').textContent = isPinAnswer ? '••••••' : promptText;
       thread.appendChild(v);
     }
 
@@ -605,7 +678,9 @@
     setFinalPlaceholder();
     ph.classList.remove('fade');
 
-    conversationHistory.push({ role: 'user', content: promptText });
+    // The array actually persisted to sessionStorage and resent on every
+    // future turn gets a redacted placeholder, never the real PIN.
+    conversationHistory.push({ role: 'user', content: isPinAnswer ? '[PIN entered]' : promptText });
     saveSession();
 
     const thinking = document.createElement('p');
@@ -624,10 +699,19 @@
       input.focus({ preventScroll: true }); // real paint gap before refocus — back-to-back blur/focus can get coalesced by the browser with no gap between them
     });
 
+    // The real PIN goes to the server in THIS one request only, spliced
+    // back in on top of a copy of conversationHistory (which itself only
+    // ever holds the redacted placeholder) — the one and only place the
+    // actual value needs to exist at all is the single request the server
+    // uses to check it against a stored hash.
+    const outgoingMessages = isPinAnswer
+      ? conversationHistory.slice(0, -1).concat([{ role: 'user', content: promptText }])
+      : conversationHistory;
+
     fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: sessionId, messages: conversationHistory, tourToken: tourToken })
+      body: JSON.stringify({ sessionId: sessionId, messages: outgoingMessages, tourToken: tourToken })
     })
       .then(function(res){ return res.json(); })
       .then(function(data){
