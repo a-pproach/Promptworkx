@@ -373,8 +373,23 @@
   // been carried out, or on any first-contact tour ping starting fresh, so
   // a stale pending action can never fire on the wrong page later.
   const PENDING_ACTION_KEY = 'liveask_pending_tour_action_v1';
-  function savePendingTourAction(target){
-    try { sessionStorage.setItem(PENDING_ACTION_KEY, JSON.stringify({ target: target })); } catch (e) { /* ignore, same fail-silent rule as saveSession */ }
+  // quickReplies (added 26 August 2026 — real bug found live: "The Tour
+  // Conclusion buttons flash up and immediately disappear again before any
+  // action is taken and cannot be retrieved.") A stop's just-offered
+  // buttons (Next stop/End tour, or the final-stop feedback options) were
+  // already appended to the OLD page's thread before this same hard
+  // navigation fires — a real page load destroys that DOM before the
+  // visitor can ever click them, and replaySession() only ever replays
+  // plain message text, never quick-replies, so they were gone for good.
+  // Carrying just the CHOICES (not the DOM) across the hop, same idea as
+  // the scroll target itself, lets the resume path below render a genuine,
+  // fresh, clickable set once this new page has actually settled.
+  function savePendingTourAction(target, quickReplies){
+    try {
+      const payload = { target: target };
+      if (Array.isArray(quickReplies) && quickReplies.length > 0) payload.quickReplies = quickReplies;
+      sessionStorage.setItem(PENDING_ACTION_KEY, JSON.stringify(payload));
+    } catch (e) { /* ignore, same fail-silent rule as saveSession */ }
   }
   function takePendingTourAction(){
     try {
@@ -382,7 +397,11 @@
       if (!raw) return null;
       sessionStorage.removeItem(PENDING_ACTION_KEY);
       const parsed = JSON.parse(raw);
-      return (parsed && typeof parsed.target === 'string') ? parsed.target : null;
+      if (!parsed || typeof parsed.target !== 'string') return null;
+      return {
+        target: parsed.target,
+        quickReplies: Array.isArray(parsed.quickReplies) ? parsed.quickReplies : null
+      };
     } catch (e) { return null; }
   }
 
@@ -418,7 +437,7 @@
   // Executes the Worker's GO_TO action. Fails completely silently on an
   // unknown destination name (never breaks the reply that came with it) —
   // same principle as the original same-page-only version.
-  function handleTourAction(action){
+  function handleTourAction(action, pendingQuickReplies){
     if (!action || action.type !== 'GO_TO') return;
     const dest = TOUR_DESTINATION_SELECTORS[action.target];
     if (!dest) return;
@@ -433,8 +452,10 @@
     // conversationHistory push, which already happened by this point)
     // carries the pending scroll-and-highlight across the reload; the
     // resume check near the bottom of this file picks it up once the new
-    // page's own copy of this script starts running.
-    savePendingTourAction(action.target);
+    // page's own copy of this script starts running. pendingQuickReplies
+    // (26 August 2026) rides along the same way — see savePendingTourAction's
+    // own comment for the bug this fixes.
+    savePendingTourAction(action.target, pendingQuickReplies);
     window.location.href = dest.page;
   }
 
@@ -490,7 +511,7 @@
         thread.appendChild(a);
         refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
-        if (data.action) handleTourAction(data.action);
+        if (data.action) handleTourAction(data.action, quickReplyChoices);
         // Real bug found live on mobile, 25 August 2026: this used to
         // force-focus the text input the instant a guest's tour greeting
         // landed — before they'd tapped or typed anything at all. On a
@@ -539,13 +560,28 @@
   // guest could always intervene by hand) — is a silent no-op, same
   // fail-quiet rule as the rest of this dispatcher. Read once via
   // takePendingTourAction() itself, so a stale flag can never fire twice.
+  //
+  // pendingQuickReplies (added 26 August 2026 — see savePendingTourAction's
+  // own comment for the real bug this fixes: a cross-page hop landing on
+  // the final stop used to carry the just-offered feedback buttons across
+  // in the DOM, which the hard navigation always destroyed before they
+  // could be clicked, with no way to get them back). A genuine, freshly
+  // built set — same buildQuickRepliesEl/submitToPanel machinery as every
+  // other quick-reply row in the app — renders here instead, once the page
+  // has actually settled, right after the scroll-and-highlight.
   (function(){
-    const pendingTarget = takePendingTourAction();
-    if (!pendingTarget) return;
-    const dest = TOUR_DESTINATION_SELECTORS[pendingTarget];
+    const pending = takePendingTourAction();
+    if (!pending) return;
+    const dest = TOUR_DESTINATION_SELECTORS[pending.target];
     if (!dest) return;
     if (normalizedDestPage(dest.page) !== normalizedCurrentPath()) return;
-    setTimeout(function(){ scrollAndHighlight(dest.selector); }, 300);
+    setTimeout(function(){
+      scrollAndHighlight(dest.selector);
+      if (pending.quickReplies && pending.quickReplies.length > 0) {
+        thread.appendChild(buildQuickRepliesEl(pending.quickReplies));
+        thread.scrollTop = thread.scrollHeight;
+      }
+    }, 300);
   })();
 
   // "About" nav-intent needs a different link target depending on which
@@ -847,7 +883,7 @@
         // decided to fire it (see handleTourAction above and the guest
         // state machine in index-worker.js's fetch()) — undefined/absent
         // on every ordinary reply, so this is a no-op there.
-        if (data.action) handleTourAction(data.action);
+        if (data.action) handleTourAction(data.action, quickReplyChoices);
         // Real fix, 7 August 2026: the async reply lands well after the
         // earlier submit-time refocus, and appending it here is a real DOM
         // mutation that can reset the caret blink a second time — same
