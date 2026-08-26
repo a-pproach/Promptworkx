@@ -189,6 +189,47 @@
   // picture of what does and doesn't get masked/stored/sent.
   const PIN_PROMPT_TEXT = "Sure — what's your PIN?";
 
+  // ---- Site-wide "Get a copy of your chat" (added 26 August 2026, direct
+  // request from Chris) ----
+  // Must match index-worker.js's own CHAT_COPY_TRIGGER constant exactly —
+  // same "one fixed string both sides check for" pattern as PIN_PROMPT_TEXT
+  // above. Also renders as the visible visitor bubble when clicked (first
+  // person, reads naturally as something the visitor just said) — see
+  // refreshChatCopyLink below.
+  const CHAT_COPY_TRIGGER = "Get a copy of my chat";
+
+  // Real bug already fixed once this session, deliberately never repeated
+  // here: an earlier "close this chat panel" control was positioned
+  // ABSOLUTE against .ask-box, which only grows tall enough to properly fit
+  // an absolutely-positioned child once .ask-thread already has real
+  // content — the close button ended up landing right on top of the send
+  // button, a genuine visual overlay/bleed bug (see the "Reveal-on-
+  // interaction" comment near the top of this file for the fuller story of
+  // that fix). This control is built the opposite way on purpose: a plain,
+  // normal in-flow child appended at the END of #askThread, exactly like
+  // every .ask-msg bubble and the .ask-quickreplies row already are — the
+  // box naturally grows to contain it, nothing can ever sit on top of
+  // anything else. Removed and re-appended after every new reply (see the
+  // three call sites below) so it's always the last thing in the thread,
+  // never accumulating a copy per turn.
+  function refreshChatCopyLink(){
+    const existing = document.getElementById('ask-chatcopy-link');
+    if (existing) existing.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'ask-chatcopy-link';
+    wrap.style.cssText = 'margin-top:10px;text-align:center;';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.cssText = 'background:none;border:none;color:#5f5e5a;font-size:12px;text-decoration:underline;cursor:pointer;padding:4px 8px;';
+    btn.textContent = 'Click here to get a copy of your chat';
+    btn.addEventListener('click', function(){
+      submitToPanel(CHAT_COPY_TRIGGER, { showVisitorBubble: true });
+    });
+    wrap.appendChild(btn);
+    thread.appendChild(wrap);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
   // ---- Cross-page session persistence (added 24 August 2026, alongside
   // this file's consolidation) ----
   // sessionStorage is per-tab, per-origin, and survives a real page
@@ -279,6 +320,12 @@
     clearTimeout(rotateFadeTimeout);
     setFinalPlaceholder();
     ph.classList.remove('fade');
+    // Persistent chat-copy control — restored on a same-tab reload/nav same
+    // as everything else in this replay, so it's not missing until the next
+    // reply happens to land.
+    if (conversationHistory.some(function(m){ return m.role === 'assistant'; })) {
+      refreshChatCopyLink();
+    }
     thread.scrollTop = thread.scrollHeight;
   }
 
@@ -441,6 +488,7 @@
           a.appendChild(buildQuickRepliesEl(quickReplyChoices));
         }
         thread.appendChild(a);
+        refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
         if (data.action) handleTourAction(data.action);
         // Real bug found live on mobile, 25 August 2026: this used to
@@ -459,6 +507,7 @@
         a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
         a.querySelector('p').textContent = "That's taking longer than it should to load your tour — try refreshing, or just ask a question below.";
         thread.appendChild(a);
+        refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
       });
   }
@@ -791,6 +840,7 @@
           a.appendChild(buildQuickRepliesEl(quickReplyChoices));
         }
         thread.appendChild(a);
+        refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
         // Custom AI Tours: only ever present on a tour guest's turn, and
         // only on the specific turn the Worker's guest-state-machine
@@ -821,6 +871,7 @@
         a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
         a.querySelector('p').textContent = "That's taking longer than it should — try again, or jump straight to a door below.";
         thread.appendChild(a);
+        refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
         if (opts.refocusInput) {
           autoFocusPending = true;
@@ -984,6 +1035,7 @@
         a.appendChild(linkPara);
       }
       thread.appendChild(a);
+      refreshChatCopyLink();
       thread.scrollTop = thread.scrollHeight;
 
       // Fed into history as an assistant turn so the visitor's next reply
