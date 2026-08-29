@@ -376,6 +376,8 @@
   --amber:#E8A13D;
   --logo-blue:#005FAE;
   --logo-blue-deep:#00457F;
+  --danger:#B3261E;
+  --danger-deep:#8C1D16;
   --charcoal:#222222;
   --gencheck-tint:#B6647A;
   --genguard-muted:#8F5A64;
@@ -424,30 +426,147 @@ header nav a.nav-buy:hover img{opacity:.75}
 .ask-panel{padding:10px 0;background:var(--paper);position:sticky;top:0;z-index:50;border-bottom:1px solid transparent;transition:border-color .2s}
 .ask-panel .wrap{padding:0 4px 0 10px}
 .ask-panel.pinned{border-bottom-color:var(--line)}
-.ask-box{background:#fff;border:1px solid var(--line);width:100%;margin:0 auto;box-shadow:0 2px 0 rgba(29,42,58,.05);border-radius:28px;transition:border-radius .2s;position:relative}
-.ask-box.expanded{border-radius:20px}
+.ask-box{width:100%;margin:0 auto;position:relative;display:flex;flex-direction:column;gap:8px}
 .ask-close-btn{display:none;position:absolute;bottom:12px;right:12px;width:28px;height:28px;border-radius:50%;border:none;background:var(--paper);color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;align-items:center;justify-content:center;z-index:10;box-shadow:0 1px 4px rgba(29,42,58,.15)}
 .ask-close-btn:hover{background:var(--line);color:var(--ink)}
-.ask-box.expanded .ask-close-btn{display:flex}
+.ask-thread.active .ask-close-btn{display:flex}
+/* Chat window (LiveAsk UI Panel Upgrade, 26 August 2026, restructured per
+   Chris's explicit correction) — deliberately its OWN square-cornered box,
+   separate from the User Input Panel below it. Every reference app in
+   UX_Comparison.md (and this very Cowork composer) treats "where you type"
+   and "what came back" as two distinct elements — we still have to keep
+   this one visually restrained, unlike a native full-page chat app, since
+   we're a guest component sitting on someone else's site, not the owner
+   of the whole page. */
+.ask-thread{display:none;position:relative;background:#fff;border:1px solid var(--line);border-radius:0;box-shadow:0 2px 0 rgba(29,42,58,.05);padding:18px 20px;max-height:320px;overflow-y:auto}
+.ask-thread.active{display:block}
+/* User Input Panel (composer + Row 2) — one contiguous, permanently
+   rounded, ALWAYS-visible pill: present in the snapped-to-top idle state,
+   before any conversation, and stays exactly where it is whether the chat
+   window above it is open or closed. No divider between the two internal
+   layers, only spacing — matching the Cowork composer reference. */
+.ask-uip{background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:0 2px 0 rgba(29,42,58,.05);display:flex;flex-direction:column}
 .ask-input-row{position:relative;display:flex;align-items:flex-end;gap:6px;padding:14px 16px}
-.ask-input-row textarea{flex:1;border:none;outline:none;font-family:var(--body);font-size:1.15rem;color:var(--ink);caret-color:var(--ink);background:transparent;position:relative;z-index:2;resize:none;max-height:6.6em;line-height:1.1;padding:8px 0 8px 85px;overflow-y:auto}
-.ask-fake-placeholder{position:absolute;left:115px;top:50%;transform:translateY(-50%) translateZ(0);will-change:contents;font-family:var(--body);font-size:1.15rem;color:var(--ink-soft);pointer-events:none;transition:opacity .6s ease;z-index:1;max-width:calc(100% - 210px);line-height:1.1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+/* 26 August 2026, third correction: Row 1 is now text-only (mic/send moved
+   down to Row 2, matching the reference UIP exactly) — so the extra 85px
+   left inset that used to make room for a permanently-visible logo now
+   only applies while the panel is idle. The instant real typing starts,
+   :has(#askPlaceholder.fade) collapses it back to the row's own normal
+   16px edge padding, in the same .6s as the placeholder/logo fade below —
+   one continuous motion, not two separately-timed changes. */
+.ask-input-row textarea{flex:1;border:none;outline:none;font-family:var(--body);font-size:1.15rem;color:var(--ink);caret-color:var(--ink);background:transparent;position:relative;z-index:2;resize:none;max-height:6.6em;line-height:1.1;padding:8px 0 8px 85px;overflow-y:auto;transition:padding-left .6s ease}
+.ask-input-row:has(#askPlaceholder.fade) textarea{padding-left:0}
+.ask-fake-placeholder{position:absolute;left:115px;top:50%;transform:translateY(-50%) translateZ(0);will-change:contents;font-family:var(--body);font-size:1.15rem;color:var(--ink-soft);pointer-events:none;transition:opacity .6s ease;z-index:1;max-width:calc(100% - 131px);line-height:1.1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .ask-fake-placeholder.fade{opacity:0}
 /* Scoped to the "Ask another question..." message only — never the
    rotating landing prompts, per explicit correction 7 August 2026. */
 .ask-fake-placeholder--final{text-align:right;font-size:0.92rem;left:20px;max-width:none;width:calc(100% - 120px);white-space:nowrap;display:block;overflow:visible}
-/* ── LiveAsk mark — inline at the panel's leading edge, real native cursor
-   sits immediately after it (see textarea/placeholder left offset above) ── */
-.ask-liveask-inline{position:absolute;left:16px;top:50%;transform:translateY(-50%);height:20px;width:auto;z-index:2;pointer-events:none}
-.ask-mic{background:none;border:none;color:var(--ink-soft);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;z-index:2;transition:background .15s,color .15s}
+/* ── LiveAsk mark — sits inside the idle placeholder now (see the img's new
+   position in the markup), real native cursor lands immediately after it
+   (see textarea's left padding above). It fades out in lockstep with the
+   placeholder text via the shared #askPlaceholder.fade state — one signal,
+   both elements — never touched directly by JS. ── */
+.ask-liveask-inline{position:absolute;left:16px;top:50%;transform:translateY(-50%);height:20px;width:auto;z-index:2;pointer-events:none;transition:opacity .6s ease}
+.ask-input-row:has(#askPlaceholder.fade) .ask-liveask-inline{opacity:0}
+.ask-mic{background:none;border:none;color:var(--ink-soft);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s,color .15s}
 .ask-mic:hover{background:var(--paper);color:var(--navy)}
 .ask-mic svg{width:19px;height:19px}
 .ask-mic.listening{color:var(--logo-blue)}
-.ask-send{background:var(--logo-blue);color:#fff;border:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;z-index:2;transition:background .15s}
+.ask-send{background:var(--logo-blue);color:#fff;border:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s}
 .ask-send:hover{background:var(--logo-blue-deep)}
 .ask-send svg{width:18px;height:18px}
-.ask-thread{display:none;border-top:1px solid var(--line);padding:18px 20px;max-height:320px;overflow-y:auto}
-.ask-thread.active{display:block}
+/* Row 2 — layer two of the User Input Panel. Permanently visible (no more
+   .active gate — it lives inside .ask-uip, which is never hidden), no
+   divider from layer one above it, just spacing. 26 August 2026, third
+   correction: mic + send now live here too (Row 1 is text-only), pinned
+   to the right via .ask-row2-right/margin-left:auto while the + and any
+   quickReply choices cluster on the left and wrap independently. */
+.ask-row2{display:flex;align-items:center;gap:8px;padding:4px 16px 14px}
+.ask-row2-left{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex:1 1 auto;min-width:0}
+.ask-row2-right{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
+.ask-row2-plus{flex-shrink:0;width:26px;height:26px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer;background:none;border:none;padding:0;position:relative;z-index:61}
+.ask-row2-plus:hover{color:var(--navy)}
+.ask-row2-plus svg{width:22px;height:22px}
+/* ── `+` menu / Secondary Input Layer (LiveAsk UI Panel Upgrade v3, 27
+   August 2026) — one shared popover shell, built entirely by JS
+   (liveask-widget.js: openPlusMenu/openSecondaryInput/renderSecondaryPanel)
+   and reused for the public + menu, the Admin PIN entry, Give Feedback,
+   Restart Tour confirmation, and every RA Admin sub-view. Desktop: a
+   discreet upward-opening popover anchored to the + (spec Section 4).
+   Mobile: a capped-height bottom sheet with a scrim (spec Section 4). ── */
+.ask-panel-scrim{display:none;position:fixed;inset:0;background:transparent;z-index:59}
+.ask-panel-scrim.open{display:block}
+.ask-popover{display:none;position:absolute;width:min(320px,90vw);max-height:60vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 28px rgba(29,42,58,.18);padding:8px;z-index:60}
+.ask-popover.open{display:block}
+/* Phase 2 UI refinement pass (28 August 2026): section-label heading
+   system, blue (--logo-blue) as the one primary/action color throughout
+   this component family, a dedicated --danger treatment reserved for
+   Revoke/Delete only, and new shared row/nav/progress/rating primitives
+   used across Admin, Manage Tours, Manage Quick Menu and Give Feedback. */
+.ask-popover-section-label{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--logo-blue);line-height:1.2;padding:0 10px 12px}
+.ask-popover-section-label--first{padding-top:12px}
+.ask-popover-divider{height:1px;background:#D8DEE5;margin:16px 4px}
+.ask-popover-item{display:block;width:100%;text-align:left;background:none;border:none;font:inherit;font-size:.95rem;color:var(--ink);padding:11px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.ask-popover-item:hover,.ask-popover-item:focus-visible{background:rgba(0,95,174,.07)}
+.ask-popover-item.ask-popover-item--muted{color:var(--ink-soft);font-size:.85rem;cursor:default}
+.ask-popover-item.ask-popover-item--muted:hover{background:none}
+.ask-popover-back{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);background:none;border:none;cursor:pointer;padding:8px 10px 4px}
+.ask-popover-back:hover{color:var(--ink)}
+.ask-popover-title{font-weight:700;font-size:.98rem;color:var(--navy);padding:4px 10px 8px}
+.ask-popover-field{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:11px 10px;font:inherit;font-size:.95rem;margin:4px 0 10px;transition:border-color .12s}
+.ask-popover-field:focus{border-color:var(--logo-blue);outline:none}
+.ask-popover-field--textarea{resize:vertical;min-height:88px;font-family:inherit;line-height:1.5}
+.ask-popover-actions{display:flex;gap:8px;padding:4px 10px 8px;flex-wrap:wrap}
+.ask-popover-actions .btn--compact{padding:8px 16px;font-size:.85rem}
+.ask-popover-actions .btn--liveask:hover{background:var(--logo-blue-deep)}
+.ask-popover-actions .btn--ghost{border-color:var(--line);color:var(--ink-soft);background:none}
+.ask-popover-actions .btn--ghost:hover{border-color:var(--ink-soft);color:var(--ink)}
+.ask-popover-actions .btn--danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.ask-popover-actions .btn--danger:hover{background:var(--danger-deep);border-color:var(--danger-deep)}
+.ask-popover-error{color:var(--ink-soft);font-weight:600;font-size:.82rem;padding:0 10px 6px}
+.ask-popover-note{color:var(--ink-soft);font-size:.82rem;padding:0 10px 8px}
+.ask-popover-tourrow{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:none;padding:11px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.ask-popover-tourrow:hover,.ask-popover-tourrow:focus-visible{background:rgba(0,95,174,.07)}
+.ask-popover-tourrow .txt{min-width:0}
+.ask-popover-tourrow .ttl{font-weight:600;font-size:.92rem;color:var(--ink)}
+.ask-popover-tourrow .meta{font-size:.78rem;color:var(--ink-soft);margin-top:1px}
+.ask-popover-tourrow .chev{color:var(--ink-soft);flex-shrink:0}
+.ask-popover-navrow{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:none;border:none;font:inherit;font-size:.95rem;color:var(--ink);padding:12px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.ask-popover-navrow:hover,.ask-popover-navrow:focus-visible{background:rgba(0,95,174,.07)}
+.ask-popover-navrow .chev{color:var(--ink-soft);flex-shrink:0;margin-left:8px}
+.ask-popover-navrow--danger{color:var(--danger);margin-top:10px;border-top:1px solid var(--line);border-radius:0;padding-top:16px}
+.ask-popover-navrow--danger:hover,.ask-popover-navrow--danger:focus-visible{background:rgba(179,38,30,.06)}
+.ask-popover-navrow--danger .chev{color:var(--danger)}
+.ask-popover-progress{padding:10px 10px 0}
+.ask-popover-progress-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:6px}
+.ask-popover-progress-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.ask-popover-progress-fill{height:100%;background:var(--logo-blue);border-radius:2px;transition:width .2s}
+.ask-popover-rating-row{display:flex;justify-content:space-between;gap:6px;padding:14px 10px 2px}
+.ask-popover-rating-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:1rem;font-family:var(--body);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .12s,border-color .12s,color .12s}
+.ask-popover-rating-btn:hover,.ask-popover-rating-btn:focus-visible{border-color:var(--logo-blue);color:var(--logo-blue)}
+.ask-popover-rating-scale{display:flex;justify-content:space-between;padding:2px 10px 10px;font-size:.72rem;color:var(--ink-soft)}
+.ask-popover-detail-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:4px 10px 10px}
+.ask-popover-detail-title{font-weight:700;font-size:1.02rem;color:var(--navy)}
+.ask-popover-status-pill{display:inline-block;font-family:var(--mono);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px}
+.ask-popover-status-pill--active{background:rgba(0,95,174,.1);color:var(--logo-blue)}
+.ask-popover-status-pill--expired{background:rgba(74,90,110,.12);color:var(--ink-soft)}
+.ask-popover-detail-meta{padding:0 10px 6px;font-size:.85rem}
+.ask-popover-detail-row{display:flex;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px solid var(--paper)}
+.ask-popover-detail-row:last-child{border-bottom:none}
+.ask-popover-detail-row .k{color:var(--ink-soft);flex-shrink:0}
+.ask-popover-detail-row .v{color:var(--ink);font-weight:600;text-align:right}
+.ask-popover-itemrow{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:none;padding:11px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.ask-popover-itemrow:hover,.ask-popover-itemrow:focus-visible{background:rgba(0,95,174,.07)}
+.ask-popover-itemrow .txt{min-width:0}
+.ask-popover-itemrow .ttl{font-weight:600;font-size:.92rem;color:var(--ink)}
+.ask-popover-itemrow .meta{font-size:.78rem;color:var(--ink-soft);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ask-popover-itemrow .chev{color:var(--ink-soft);flex-shrink:0}
+@media (max-width: 640px){
+  .ask-popover{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-height:50vh;border-radius:16px 16px 0 0;box-shadow:0 -8px 28px rgba(29,42,58,.22)}
+  .ask-panel-scrim.open{background:rgba(29,42,58,.35)}
+  .ask-popover-rating-btn{width:40px;height:40px;font-size:.92rem}
+  .ask-popover-rating-row{padding:12px 6px 2px}
+}
 
 .ask-msg{margin-bottom:16px;font-size:.98rem;line-height:1.55}
 .ask-msg .who{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
@@ -786,15 +905,37 @@ footer.site .footer-links a:hover{color:#fff}
   <section class="ask-panel" id="ask-panel">
     <div class="wrap">
       <div class="ask-box">
-        <button class="ask-close-btn" id="askCloseBtn" aria-label="Collapse conversation" type="button">&times;</button>
+        <div class="ask-thread" id="askThread">
+          <button class="ask-close-btn" id="askCloseBtn" aria-label="Collapse conversation" type="button">&times;</button>
+        </div>
+        <div class="ask-uip">
         <div class="ask-input-row">
           <img class="ask-liveask-inline" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnIHN0YW5kYWxvbmU9J25vJz8+CjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNy4zLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSI0LjIgMjIuNiAzNzIuOCA5My4yIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDQuMiAyMi42IDM3Mi44IDkzLjI7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojMDA1RkFFO30KCS5zdDF7ZmlsbDpub25lO3N0cm9rZTojNDg0ODRBO3N0cm9rZS13aWR0aDozLjMxNTE7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fQoJLnN0MntlbmFibGUtYmFja2dyb3VuZDpuZXcgICAgO30KCS5zdDN7ZmlsbDojNDg0ODRBO3N0cm9rZTojNDg0ODRBO3N0cm9rZS13aWR0aDoxLjM0ODg7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fQoJLnN0NHtmaWxsOiMwMDVGQUU7c3Ryb2tlOiMwMDVGQUU7c3Ryb2tlLXdpZHRoOjEuMzQ4ODtzdHJva2UtbWl0ZXJsaW1pdDoxMDt9Cgkuc3Q1e2ZpbGw6IzAwNUZBRTtzdHJva2U6IzAwNUZBRTtzdHJva2Utd2lkdGg6MS4zNDg4O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwO30KPC9zdHlsZT4KPGc+Cgk8Zz4KCQk8Zz4KCQkJCgkJCQk8cmVjdCB4PSIzNjMuMzQiIHk9IjMyLjk1IiB0cmFuc2Zvcm09Im1hdHJpeCg0LjQ4NjkwNmUtMTEgLTEgMSA0LjQ4NjkwNmUtMTEgMzQwLjUzODIgNDA5Ljg1NDMpIiBjbGFzcz0ic3QwIiB3aWR0aD0iMjMuNzIiIGhlaWdodD0iMy40MiIvPgoJCQk8cmVjdCB4PSIzNTMuMTkiIHk9IjIyLjgiIGNsYXNzPSJzdDAiIHdpZHRoPSIyMy43MiIgaGVpZ2h0PSIzLjQyIi8+CgkJPC9nPgoJCTxnPgoJCQkKCQkJCTxyZWN0IHg9IjM2My4zNCIgeT0iMTAyLjA5IiB0cmFuc2Zvcm09Im1hdHJpeCg0LjQ4Njg4MWUtMTEgMSAtMSA0LjQ4Njg4MWUtMTEgNDc4Ljk5ODggLTI3MS4zOTM3KSIgY2xhc3M9InN0MCIgd2lkdGg9IjIzLjcyIiBoZWlnaHQ9IjMuNDIiLz4KCQkJPHJlY3QgeD0iMzUzLjE5IiB5PSIxMTIuMjUiIGNsYXNzPSJzdDAiIHdpZHRoPSIyMy43MiIgaGVpZ2h0PSIzLjQyIi8+CgkJPC9nPgoJPC9nPgoJPGc+CgkJPGcgY2xhc3M9InN0MiI+CgkJCTxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik00LjkzLDEwNi42NnYtNzQuMWg3LjExdjY3Ljc4aDM1LjIxdjYuMzJINC45M3oiLz4KCQkJPHBhdGggY2xhc3M9InN0MyIgZD0iTTY0LjU2LDQwLjc2Yy0xLjMzLDAtMi40OC0wLjQ2LTMuNDYtMS4zOWMtMC45OC0wLjkzLTEuNDctMi4wNC0xLjQ3LTMuMzNjMC0xLjMzLDAuNDktMi40NCwxLjQ3LTMuMzYgICAgIGMwLjk4LTAuOTEsMi4xMy0xLjM3LDMuNDYtMS4zN2MxLjM2LDAsMi41MiwwLjQ2LDMuNDgsMS4zN2MwLjk2LDAuOTEsMS40NCwyLjAzLDEuNDQsMy4zNmMwLDEuMjktMC40OCwyLjQtMS40NCwzLjMzICAgICBDNjcuMDgsNDAuMyw2NS45Miw0MC43Niw2NC41Niw0MC43NnogTTYxLjEzLDEwNi42NnYtNTUuNmg2Ljc2djU1LjZINjEuMTN6Ii8+CgkJCTxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0xMDEuMDcsMTA2LjY2bC0yMS4yNC01NS42aDcuMzZsMTIuODMsMzQuOTZjMS4xNiwzLjEyLDIuMTksNi4yMywzLjA4LDkuMzVjMC44OSwzLjEyLDEuODQsNi4xNSwyLjgzLDkuMSAgICAgaC0yLjM5YzAuOTYtMi45NSwxLjg5LTUuOTgsMi43OS05LjFjMC44OS0zLjExLDEuOTItNi4yMywzLjA4LTkuMzVsMTIuODMtMzQuOTZoNy4zMWwtMjEuMjQsNTUuNkgxMDEuMDd6Ii8+CgkJCTxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0xNjIuMDksMTA3Ljg1Yy01LjIxLDAtOS43MS0xLjIyLTEzLjUtMy42NmMtMy44LTIuNDQtNi43My01LjgxLTguOC0xMC4xMmMtMi4wNy00LjMxLTMuMTEtOS4yNy0zLjExLTE0Ljg3ICAgICBjMC01LjYsMS4wMi0xMC41OCwzLjA2LTE0LjkyYzIuMDQtNC4zNCw0Ljg5LTcuNzYsOC41NS0xMC4yNWMzLjY2LTIuNDksNy45Mi0zLjczLDEyLjc2LTMuNzNjMy4wNSwwLDUuOTgsMC41Niw4LjgsMS42NyAgICAgYzIuODIsMS4xMSw1LjM1LDIuOCw3LjYxLDUuMDdjMi4yNSwyLjI3LDQuMDMsNS4xNSw1LjMyLDguNjNjMS4yOSwzLjQ4LDEuOTQsNy41OCwxLjk0LDEyLjI4djIuOTNIMTQxLjF2LTUuODJoMzkuOThMMTc4LDc3LjI3ICAgICBjMC0zLjk4LTAuNjgtNy41NC0yLjA0LTEwLjY5Yy0xLjM2LTMuMTUtMy4zLTUuNjQtNS44Mi03LjQ2Yy0yLjUyLTEuODItNS41NS0yLjczLTkuMS0yLjczYy0zLjUxLDAtNi41OSwwLjkzLTkuMjIsMi43OCAgICAgYy0yLjY0LDEuODYtNC42OSw0LjMxLTYuMTcsNy4zNmMtMS40OCwzLjA1LTIuMjEsNi40LTIuMjEsMTAuMDV2My40OGMwLDQuMzQsMC43Niw4LjE1LDIuMjksMTEuNDFjMS41MiwzLjI3LDMuNjksNS44LDYuNDksNy42MSAgICAgYzIuOCwxLjgxLDYuMTEsMi43MSw5LjkyLDIuNzFjMi41OSwwLDQuODYtMC40MSw2Ljg0LTEuMjRjMS45Ny0wLjgzLDMuNjMtMS45Myw0Ljk3LTMuMzFjMS4zNC0xLjM4LDIuMzUtMi44OCwzLjAxLTQuNSAgICAgbDYuNDIsMi4wNGMtMC44NiwyLjMyLTIuMjUsNC40OC00LjE1LDYuNDdjLTEuOTEsMS45OS00LjMsMy41OS03LjE5LDQuOEMxNjkuMTUsMTA3LjI1LDE2NS44MywxMDcuODUsMTYyLjA5LDEwNy44NXoiLz4KCQkJPHBhdGggY2xhc3M9InN0NCIgZD0iTTE4OS40OSwxMDYuNjZsMjcuMTUtNzQuMUgyMjVsMjcuNCw3NC4xaC03LjQ2bC0xNy42MS00OC40NGMtMC45OS0yLjY5LTIuMDgtNS44My0zLjI2LTkuNDIgICAgIGMtMS4xOC0zLjYtMi41My03LjkzLTQuMDUtMTNoMS40OWMtMS41Miw1LjExLTIuODgsOS40OC00LjA4LDEzLjEzYy0xLjE5LDMuNjUtMi4yNCw2Ljc1LTMuMTMsOS4zTDE5NywxMDYuNjZIMTg5LjQ5eiAgICAgIE0yMDIuMTIsODQuNjN2LTYuMjdoMzcuNjV2Ni4yN0gyMDIuMTJ6Ii8+CgkJCTxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0yODEuNDQsMTA3Ljg1Yy0zLjY1LDAtNi44OC0wLjU2LTkuNy0xLjY3Yy0yLjgyLTEuMTEtNS4xNC0yLjczLTYuOTYtNC44N2MtMS44Mi0yLjE0LTMuMDctNC43Ny0zLjczLTcuODggICAgIGw2LjQ3LTEuNTRjMC44LDMuMzUsMi4zOCw1Ljg0LDQuNzUsNy40OGMyLjM3LDEuNjQsNS40LDIuNDYsOS4wNywyLjQ2YzQuMjEsMCw3LjU4LTAuOTQsMTAuMTItMi44MyAgICAgYzIuNTQtMS44OSwzLjgxLTQuMjQsMy44MS03LjA2YzAtMi4yNi0wLjc2LTQuMTMtMi4yNi01LjYyYy0xLjUxLTEuNDktMy43Ny0yLjYtNi43OS0zLjMzbC05LjA1LTIuMTkgICAgIGMtNC43OC0xLjE2LTguMzUtMi45Ny0xMC43Mi01LjQ0Yy0yLjM3LTIuNDctMy41Ni01LjU4LTMuNTYtOS4zM2MwLTMuMTIsMC44NC01Ljg1LDIuNTEtOC4yMWMxLjY3LTIuMzUsMy45OC00LjE5LDYuOTEtNS41MiAgICAgYzIuOTMtMS4zMyw2LjI3LTEuOTksMTAuMDItMS45OWMzLjUxLDAsNi41MywwLjU0LDkuMDUsMS42MmMyLjUyLDEuMDgsNC42LDIuNTksNi4yNCw0LjU1YzEuNjQsMS45NiwyLjg3LDQuMjgsMy43MSw2Ljk2ICAgICBsLTYuMTcsMS41OWMtMC44Ni0yLjU1LTIuMy00LjY3LTQuMy02LjM0Yy0yLjAxLTEuNjctNC44My0yLjUxLTguNDgtMi41MWMtMy42OCwwLTYuNzEsMC44OC05LjEsMi42NCAgICAgYy0yLjM5LDEuNzYtMy41OCw0LjAzLTMuNTgsNi44MWMwLDIuMzUsMC44LDQuMjgsMi40MSw1Ljc3YzEuNjEsMS40OSw0LjEyLDIuNjUsNy41MywzLjQ4bDguNSwyLjA0ICAgICBjNC43MSwxLjE2LDguMjMsMi45NywxMC41Nyw1LjQyYzIuMzQsMi40NSwzLjUxLDUuNTIsMy41MSw5LjJjMCwzLjE4LTAuODgsNi0yLjYzLDguNDZjLTEuNzYsMi40NS00LjIsNC4zOC03LjM0LDUuNzcgICAgIEMyODkuMTMsMTA3LjE2LDI4NS41MiwxMDcuODUsMjgxLjQ0LDEwNy44NXoiLz4KCQk8L2c+CgkJPGc+CgkJCTxnPgoJCQkJPHBhdGggY2xhc3M9InN0NSIgZD0iTTMxNy42LDEwNi42NnYtNzQuMWg3LjA2djI1LjcxbC0wLjEsMTYuNzFsMC4xLDMuNjN2MjguMDVIMzE3LjZ6IE0zMjIuNjIsODMuNjNsLTAuMjUtNy41MSAgICAgIGMxLjc5LTIuMjUsMy41NS00LjQyLDUuMjctNi40OWMxLjcyLTIuMDcsMy40Ny00LjEyLDUuMjUtNi4xNGMxLjc3LTIuMDIsMy42MS00LjA1LDUuNS02LjA3bDMwLjg3LTMyLjQzbDYuMjQsMi4yOSAgICAgIGwtMzYuMDYsMzguODRsLTAuNSwwLjE1TDMyMi42Miw4My42M3ogTTM2Ny45MiwxMTMuNTdsLTMzLjIxLTQ1Ljc2bDQuNTMtNS4zMmwzNi4xOCw1MC44NEwzNjcuOTIsMTEzLjU3eiIvPgoJCQk8L2c+CgkJPC9nPgoJPC9nPgo8L2c+Cjwvc3ZnPg==" alt="LiveAsk" width="80" height="20">
+          <!-- KNOWN, ACCEPTED TEMPORARY EXCEPTION (28 August 2026): this
+               pre-JS fallback text and the textarea's aria-label are the one
+               place the deployment's company name still can't be centralized
+               — assets/liveask-widget.js's DEPLOYMENT_COMPANY_NAME constant
+               drives every other occurrence, but these 2 lines are static
+               markup rendered before that script runs, duplicated the same
+               way across index.html / liveask-index.html / ai-tips-index.html.
+               liveask-widget.js overwrites this text within a fraction of a
+               second of load, so the practical risk is low — but provisioning
+               a new deployment still means hand-editing these 2 lines in all
+               3 files until a build/templating step exists to inject them
+               from one source. That step is out of scope for this pass. -->
           <span class="ask-fake-placeholder" id="askPlaceholder">Ask PromptWorkx AI</span>
           <textarea id="askInput" aria-label="Ask PromptWorkx" rows="1"></textarea>
-          <button class="ask-mic" id="askMic" aria-label="Ask by voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg></button>
-          <button class="ask-send" id="askSend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="6 11 12 5 18 11"></polyline></svg></button>
         </div>
-        <div class="ask-thread" id="askThread"></div>
+        <div class="ask-row2" id="askRow2">
+          <div class="ask-row2-left" id="askRow2Left">
+            <button type="button" class="ask-row2-plus" id="askPlusBtn" aria-label="More options" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+          </div>
+          <div class="ask-row2-right">
+            <button class="ask-mic" id="askMic" aria-label="Ask by voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg></button>
+            <button class="ask-send" id="askSend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="6 11 12 5 18 11"></polyline></svg></button>
+          </div>
+        </div>
+        </div>
       </div>
     </div>
   </section>
