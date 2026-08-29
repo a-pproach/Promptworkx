@@ -20,8 +20,47 @@
 //    upcoming Custom AI Tours page-hop action reuses this same mechanism
 //    rather than needing its own bespoke plumbing.
 (function(){
+  // ---- Deployment identity (28 August 2026) ----
+  // The single source for this file's customer-specific UI strings. Every
+  // occurrence of the deployment's display name below — the + menu's
+  // customer-section heading, the idle/rotating placeholder text, the
+  // returning-visitor placeholder, the "thinking…" indicator, and any
+  // customer-name-bearing Quick Reply label — is derived from this one
+  // constant. Provisioning a new deployment means changing this one line,
+  // not hunting the file for "PromptWorkx".
+  //
+  // Deliberately NOT covered by this constant (confirmed 28 August 2026):
+  // - The AI speaker label is the separate AI_SPEAKER_LABEL constant right
+  //   below — "LiveAsk AI" is platform branding, not customer-specific,
+  //   and must never carry the deployment name.
+  // - Governed reply CONTENT that is genuine business copy rather than
+  //   reusable UI/template text (e.g. the "Two Pillars" answer, and the
+  //   "How to use LiveAsk" explanation — the latter also names a specific
+  //   RA ("Chris"), not just the company, so company-name substitution
+  //   alone wouldn't actually make it deployment-portable) stays literal
+  //   for this pass — that's a content-authoring problem, not a config one.
+  // - TOUR_DESTINATIONS' labels/context and the system prompt itself
+  //   (index-worker.js / system-prompt.js) are far more deeply
+  //   PromptWorkx-specific — real page-content descriptions and business
+  //   knowledge, not a swappable name. Productising those is a separate,
+  //   later workstream, not part of this constant.
+  // - The static pre-JS placeholder fallback + aria-label baked into
+  //   index.html / liveask-index.html / ai-tips-index.html (6 lines, 2 per
+  //   file) can't be centralized without a build/templating step, which is
+  //   explicitly out of scope for this pass. This is a KNOWN, ACCEPTED
+  //   TEMPORARY EXCEPTION: provisioning a new deployment still means
+  //   hand-editing those 6 lines across the three HTML files until a build
+  //   step exists to inject them from one source. Low risk in practice —
+  //   this file's own init overwrites that text within a fraction of a
+  //   second of load — but a real manual step until that future step lands.
+  const DEPLOYMENT_COMPANY_NAME = 'PromptWorkx';
+  // Platform-controlled constant — never derived from DEPLOYMENT_COMPANY_NAME.
+  // Proper case here; the existing .ask-msg .who CSS rule uppercases it for
+  // display, so nothing in this file needs to hand-type caps.
+  const AI_SPEAKER_LABEL = 'LiveAsk AI';
+
   const prompts = [
-    "Ask PromptWorkx AI",
+    `Ask ${DEPLOYMENT_COMPANY_NAME} AI`,
     "Am I visible to ChatGPT?",
     "What's the difference between SEO and GEO?",
     "Does Google AI know who I am?",
@@ -32,6 +71,13 @@
   const input = document.getElementById('askInput');
   const thread = document.getElementById('askThread');
   const askPanel = document.getElementById('ask-panel');
+  const row2 = document.getElementById('askRow2');
+  // 26 August 2026, third correction: Row 2 now also permanently hosts mic
+  // + send (moved down from Row 1) inside .ask-row2-right — so quickReply
+  // buttons must be appended into this LEFT cluster specifically, not into
+  // #askRow2 directly, or they'd land after mic/send in the DOM and break
+  // the always-mic/send-pinned-right layout.
+  const row2Left = document.getElementById('askRow2Left');
 
   // The final "Ask another question..." placeholder needs genuinely
   // different content per viewport, not just different CSS wrapping —
@@ -40,9 +86,9 @@
   function setFinalPlaceholder(){
     ph.classList.add('ask-fake-placeholder--final');
     if (window.matchMedia('(min-width: 1024px)').matches) {
-      ph.textContent = 'Ask another question, or get PromptWorkx to contact you';
+      ph.textContent = `Ask another question, or get ${DEPLOYMENT_COMPANY_NAME} to contact you`;
     } else {
-      ph.innerHTML = 'Ask another question<br>or get PromptWorkx<br>to contact you';
+      ph.innerHTML = `Ask another question<br>or get ${DEPLOYMENT_COMPANY_NAME}<br>to contact you`;
     }
   }
 
@@ -105,7 +151,22 @@
       // once, freezing the placeholder on its first static prompt. Moved
       // here so only a genuine subsequent tap (or the post-submit refocus,
       // which is itself gated by autoFocusPending) stops it.
-      pauseRotation();
+      //
+      // Real bug fix, 26 August 2026: pauseRotation() was unconditional
+      // here, so a genuine tap into an EMPTY box — with no rotation even
+      // running (e.g. the "final"/post-conversation placeholder, or the
+      // brief window before the first reply lands) — still added the
+      // shared 'fade' class. Since the logo and the textarea's own left
+      // padding now key off that same class (see the CSS :has() rules), a
+      // plain tap with zero characters typed was enough to start the logo
+      // fading and the padding collapsing — the exact glitch reported live:
+      // a half-transparent logo with the moving caret cutting through it,
+      // triggered purely by focusing, not by actually typing anything.
+      // Guarding on rotateTimer restricts the fade to when rotation is
+      // genuinely active (the only case this was ever meant to cover) —
+      // real typing still fades things correctly regardless, via the
+      // separate 'input' listener below, which checks input.value.length.
+      if (rotateTimer) { pauseRotation(); }
       clearInterval(rotateTimer); rotateTimer = null;
       clearTimeout(rotateFadeTimeout);
       // Covers a genuinely NEW focus — e.g. tabbing into the field with a
@@ -311,7 +372,7 @@
       } else if (m.role === 'assistant') {
         const a = document.createElement('div');
         a.className = 'ask-msg ai';
-        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
         a.querySelector('p').textContent = m.content;
         thread.appendChild(a);
       }
@@ -326,6 +387,12 @@
     if (conversationHistory.some(function(m){ return m.role === 'assistant'; })) {
       refreshChatCopyLink();
     }
+    // Row 2 never persisted quickReplies across a reload even in the old
+    // one-shot design (they were never part of conversationHistory/
+    // saveSession to begin with) — explicit clear here just guarantees
+    // Row 2 comes back showing nothing stale (only the static '+') rather
+    // than whatever it happened to hold in memory before the reload.
+    renderRow2([]);
     thread.scrollTop = thread.scrollHeight;
   }
 
@@ -475,7 +542,7 @@
 
     const thinking = document.createElement('p');
     thinking.className = 'ask-thinking';
-    thinking.textContent = 'PromptWorkx is thinking…';
+    thinking.textContent = `${DEPLOYMENT_COMPANY_NAME} is thinking…`;
     thread.appendChild(thinking);
     thread.scrollTop = thread.scrollHeight;
 
@@ -493,7 +560,7 @@
         saveSession();
         const a = document.createElement('div');
         a.className = 'ask-msg ai';
-        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
         const replyP = a.querySelector('p');
         if (showPrivacyNotice) {
           a.insertBefore(buildPrivacyNoticeEl(), replyP);
@@ -503,11 +570,10 @@
         // data.quickReplies at all (only submitToPanel's success handler
         // did) — so the Worker's new fixed "Start tour" button silently had
         // nowhere to go, leaving the guest to type "yes" regardless. Same
-        // validated, one-shot Quick Reply rendering as everywhere else.
+        // validated Quick Reply rendering as everywhere else, now landing
+        // in the persistent Row 2 zone rather than the bubble itself.
         const quickReplyChoices = validQuickReplies(data);
-        if (quickReplyChoices.length > 0) {
-          a.appendChild(buildQuickRepliesEl(quickReplyChoices));
-        }
+        renderRow2(quickReplyChoices);
         thread.appendChild(a);
         refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
@@ -525,9 +591,10 @@
         thinking.remove();
         const a = document.createElement('div');
         a.className = 'ask-msg ai';
-        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
         a.querySelector('p').textContent = "That's taking longer than it should to load your tour — try refreshing, or just ask a question below.";
         thread.appendChild(a);
+        renderRow2([]);
         refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
       });
@@ -566,19 +633,28 @@
   // the final stop used to carry the just-offered feedback buttons across
   // in the DOM, which the hard navigation always destroyed before they
   // could be clicked, with no way to get them back). A genuine, freshly
-  // built set — same buildQuickRepliesEl/submitToPanel machinery as every
-  // other quick-reply row in the app — renders here instead, once the page
-  // has actually settled, right after the scroll-and-highlight.
+  // built set — same renderRow2/submitToPanel machinery as every other
+  // quick-reply row in the app — renders into Row 2 here instead, once the
+  // page has actually settled, right after the scroll-and-highlight.
   (function(){
     const pending = takePendingTourAction();
     if (!pending) return;
     const dest = TOUR_DESTINATION_SELECTORS[pending.target];
     if (!dest) return;
     if (normalizedDestPage(dest.page) !== normalizedCurrentPath()) return;
+    // 26 August 2026: a guided tour hopping someone to a new page IS the
+    // deliberate action — per Chris, this should deterministically reveal
+    // the thread (so the tour's own narration is actually visible here),
+    // unlike ordinary same-tab navigation elsewhere on the site, which
+    // stays collapsed on arrival per replaySession's 25 August redesign.
+    // Called immediately, ahead of the scroll/highlight delay below, so
+    // the panel is already open by the time the highlight lands rather
+    // than visibly popping open a beat later.
+    revealPanel();
     setTimeout(function(){
       scrollAndHighlight(dest.selector);
       if (pending.quickReplies && pending.quickReplies.length > 0) {
-        thread.appendChild(buildQuickRepliesEl(pending.quickReplies));
+        renderRow2(pending.quickReplies);
         thread.scrollTop = thread.scrollHeight;
       }
     }, 300);
@@ -694,7 +770,9 @@
     return !conversationHistory.some(function(m){ return m.role === 'assistant'; });
   }
 
-  // ---- Quick Replies (Customer 000 / GEO 4, added 24 August 2026) ----
+  // ---- Quick Replies / Row 2 (Customer 000 / GEO 4, added 24 August 2026;
+  // moved into the persistent Row 2 zone as part of the LiveAsk UI Panel
+  // Upgrade, 26 August 2026) ----
   // Renders the model's offered closed-choice buttons (data.quickReplies —
   // see system-prompt.js "Guided (closed) questions — Quick Replies" and
   // Section 8). Distinct from NAV_INTENTS: a Quick Reply click is ordinary
@@ -704,40 +782,43 @@
   // another round of Quick Replies, or none). Also distinct from Governed
   // Actions (lead capture, verification) — selecting a choice never itself
   // triggers a consequential action, only ordinary conversation input.
-  function buildQuickRepliesEl(choices){
-    const wrap = document.createElement('div');
-    wrap.className = 'ask-quickreplies';
-    choices.forEach(function(choice){
+  //
+  // Until 26 August 2026 this rendered a one-shot button row appended
+  // inside whichever AI message bubble had just landed — meaning the
+  // buttons for a mid-tour turn, or a tour-conclusion turn, lived and died
+  // with that one bubble, and any turn that crossed a hard page navigation
+  // lost them outright unless something (see savePendingTourAction) went
+  // out of its way to carry them across by hand. Row 2 replaces that: one
+  // persistent zone, immediately below the composer, always reflecting the
+  // CURRENT turn's valid choices — cleared and rebuilt on every call, never
+  // tied to a specific historical bubble. The '+' placeholder to its left
+  // is static markup, not touched here — it's a reserved-but-inert spot
+  // for the Phase 2 capability menu, per the approved UI Panel Upgrade
+  // sequence.
+  //
+  // The old wrap.remove()-on-click dance (and the mobile race it was
+  // working around — a self-removing button detaching itself from the
+  // page before the outside-click-to-collapse listener could see the click
+  // as "inside the panel") no longer applies: Row 2's buttons are never
+  // removed synchronously on click, only disabled, and the container gets
+  // wiped and rebuilt by the next renderRow2() call once a response (or a
+  // failure) actually lands.
+  function renderRow2(choices){
+    Array.prototype.forEach.call(row2Left.querySelectorAll('.ask-quickreply-btn'), function(b){ b.remove(); });
+    (choices || []).forEach(function(choice){
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ask-quickreply-btn';
       btn.textContent = choice;
       btn.addEventListener('click', function(){
-        // Real bug found live on mobile, 25 August 2026: this used to call
-        // wrap.remove() immediately, synchronously, right here. That's a
-        // problem now that the document-level click-outside-to-collapse
-        // listener exists (see it further down) — removing wrap detaches
-        // the very button that was just clicked from the page BEFORE this
-        // same click event finishes bubbling up to that listener. By the
-        // time the listener asks "was this click inside #ask-panel?", the
-        // clicked button has no path up to #ask-panel any more (it's still
-        // attached to wrap, but wrap itself is now detached from
-        // everything), so the check wrongly says "no" and collapses the
-        // panel — right as the normal post-submit refocus pops the mobile
-        // keyboard back open. Net effect on a phone: every quick-reply tap
-        // looked like "the panel slams shut and the keyboard pops up".
-        // Fix: disable the buttons immediately (so a genuine accidental
-        // double-tap still can't submit twice — same guarantee as before),
-        // but defer the actual DOM removal to the next tick, after this
-        // click has fully finished bubbling and the outside-click check has
-        // already correctly seen it as "inside the panel".
-        Array.prototype.forEach.call(wrap.querySelectorAll('button'), function(b){ b.disabled = true; });
+        // Scoped to quickreply buttons only — mic/send now live in this
+        // same #askRow2 (in .ask-row2-right) and must stay usable while a
+        // choice submission is in flight, not get swept up by this guard.
+        Array.prototype.forEach.call(row2Left.querySelectorAll('.ask-quickreply-btn'), function(b){ b.disabled = true; });
         submitToPanel(choice, { showVisitorBubble: true });
-        setTimeout(function(){ wrap.remove(); }, 0);
       });
-      wrap.appendChild(btn);
+      row2Left.appendChild(btn);
     });
-    return wrap;
   }
 
   // Defensive client-side re-validation of data.quickReplies — the Worker
@@ -810,7 +891,7 @@
 
     const thinking = document.createElement('p');
     thinking.className = 'ask-thinking';
-    thinking.textContent = 'PromptWorkx is thinking…';
+    thinking.textContent = `${DEPLOYMENT_COMPANY_NAME} is thinking…`;
     thread.appendChild(thinking);
     thread.scrollTop = thread.scrollHeight;
     // Real fix, 7 August 2026: this refocus previously ran BEFORE the
@@ -860,7 +941,7 @@
         saveSession();
         const a = document.createElement('div');
         a.className = 'ask-msg ai';
-        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
         // Capture the reply <p> BEFORE inserting the notice paragraph — real
         // bug found in testing (23 August 2026): insertBefore adds a SECOND
         // <p>, so a querySelector('p') called afterward grabs whichever one
@@ -872,9 +953,7 @@
         }
         replyP.textContent = replyText;
         const quickReplyChoices = validQuickReplies(data);
-        if (quickReplyChoices.length > 0) {
-          a.appendChild(buildQuickRepliesEl(quickReplyChoices));
-        }
+        renderRow2(quickReplyChoices);
         thread.appendChild(a);
         refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
@@ -904,9 +983,10 @@
         thinking.remove();
         const a = document.createElement('div');
         a.className = 'ask-msg ai';
-        a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+        a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
         a.querySelector('p').textContent = "That's taking longer than it should — try again, or jump straight to a door below.";
         thread.appendChild(a);
+        renderRow2([]);
         refreshChatCopyLink();
         thread.scrollTop = thread.scrollHeight;
         if (opts.refocusInput) {
@@ -1048,7 +1128,7 @@
 
       const a = document.createElement('div');
       a.className = 'ask-msg ai';
-      a.innerHTML = '<span class="who">PROMPTWORKX LIVEASK AI</span><p></p>';
+      a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
       // Capture the reply <p> BEFORE inserting the notice — see the matching
       // comment in submitToPanel's success handler above for why. Must be
       // checked BEFORE the assistant turn is pushed to conversationHistory
@@ -1092,6 +1172,945 @@
       // than gated, since a nav-intent click is never the "visitor was
       // just typing" case submitToPanel's refocusInput flag exists for.
     });
+  });
+
+  // ====================================================================
+  // ---- `+` capability menu / Secondary Input Layer / Admin (LiveAsk UI
+  // Panel Upgrade v3, added 27 August 2026) ----
+  // ====================================================================
+  // One shared popover shell — a discreet upward-opening popover on
+  // desktop, a capped-height bottom sheet with a scrim on mobile (spec
+  // Section 4) — reused for the public `+` menu itself, the Secondary Input
+  // Layer (masked PIN entry, Give Feedback's rating/comment, Restart Tour's
+  // confirmation), and every RA Admin sub-view (Create Tour handoff, Manage
+  // Tours, Manage Quick Menu). Built entirely as dynamic DOM, same
+  // established pattern as refreshChatCopyLink/buildPrivacyNoticeEl above —
+  // nothing new baked into the three pages' static markup beyond the `+`
+  // button itself.
+  //
+  // Design note on "conversational" vs "structured": Tour CREATION keeps
+  // its existing fully-conversational bookflow engine untouched (spec
+  // Section 8.3, Section 12's "do not convert generative Tour authoring
+  // into a rigid form wizard") — Admin's "Create Tour" below is only a
+  // front door into that same engine (see adminCreateTourStart in
+  // index-worker.js). Everything else here (Manage Tours' Run/Test and
+  // Edit, Manage Quick Menu's Add) genuinely IS structured admin data entry
+  // — Section 3.4 explicitly lists "small contextual choice sets" as a
+  // Secondary Input primitive, and these fit that better than a multi-turn
+  // chat exchange would.
+
+  const scrim = document.createElement('div');
+  scrim.className = 'ask-panel-scrim';
+  scrim.id = 'askPanelScrim';
+  const popover = document.createElement('div');
+  popover.className = 'ask-popover';
+  popover.id = 'askPopover';
+  askPanel.querySelector('.ask-box').appendChild(scrim);
+  askPanel.querySelector('.ask-box').appendChild(popover);
+
+  const plusBtn = document.getElementById('askPlusBtn');
+
+  // Admin session state — mirrors the server's adminsession:<sessionId>
+  // record only loosely (raName, for display; the actual authority lives
+  // server-side and is re-checked on every adminAction call). Cleared
+  // whenever the popover fully closes, same "don't linger" principle as the
+  // server's own 30-minute TTL — a closed panel means this sitting is over.
+  let adminAuthed = null; // { raName } | null
+
+  function closePlusMenu(){
+    popover.classList.remove('open');
+    scrim.classList.remove('open');
+    plusBtn.setAttribute('aria-expanded', 'false');
+    adminAuthed = null;
+  }
+
+  // Anchors the popover to the ACTUAL current position of the + button,
+  // computed via JS rather than a pure-CSS "bottom:100% of the nearest
+  // positioned ancestor" trick — real live-test find building this: the
+  // popover's positioning parent is .ask-box, whose height changes with the
+  // conversation thread's own height (collapsed vs expanded, short vs long
+  // history), so a fixed CSS anchor drifted away from the + button itself
+  // and, on this site's top-pinned panel (unlike a bottom-anchored chat
+  // composer, .ask-panel sits at position:sticky;top:0), could open mostly
+  // above the visible viewport. Opens DOWNWARD from the + here for that
+  // same reason — there's reliably more room below the composer on this
+  // layout than above it. Skipped entirely on mobile — the bottom-sheet
+  // media query fully owns position there (fixed to the viewport edges),
+  // and a leftover inline top/left would otherwise outrank it (inline
+  // style beats a class selector) — so both are explicitly cleared first.
+  function positionPopover(){
+    if (window.matchMedia('(max-width: 640px)').matches) {
+      popover.style.top = '';
+      popover.style.left = '';
+      popover.style.bottom = '';
+      return;
+    }
+    const boxRect = document.querySelector('.ask-box').getBoundingClientRect();
+    const btnRect = plusBtn.getBoundingClientRect();
+    popover.style.left = Math.max(0, btnRect.left - boxRect.left) + 'px';
+    popover.style.top = (btnRect.bottom - boxRect.top + 8) + 'px';
+    popover.style.bottom = 'auto';
+  }
+
+  // Renders one "screen" into the shared popover — a title, an optional
+  // Back control, and whatever the caller builds into the body container.
+  // Every menu/sub-view below calls this rather than manipulating popover
+  // directly, so opening a new screen always starts from a clean slate.
+  // opts.progress = { step, total } — Phase 2 UI refinement pass: renders
+  // a small "n/total" + filled bar above the title, used by the two-step
+  // Give Feedback flow. Purely presentational — carries no state of its
+  // own beyond what the caller already tracks (rating/comment).
+  function renderSecondaryPanel(title, buildFn, opts){
+    opts = opts || {};
+    popover.innerHTML = '';
+    if (opts.onBack) {
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'ask-popover-back';
+      back.textContent = '← Back';
+      back.addEventListener('click', opts.onBack);
+      popover.appendChild(back);
+    }
+    if (opts.progress) {
+      const wrap = document.createElement('div');
+      wrap.className = 'ask-popover-progress';
+      const lbl = document.createElement('div');
+      lbl.className = 'ask-popover-progress-label';
+      lbl.textContent = opts.progress.step + '/' + opts.progress.total;
+      const bar = document.createElement('div');
+      bar.className = 'ask-popover-progress-bar';
+      const fill = document.createElement('div');
+      fill.className = 'ask-popover-progress-fill';
+      fill.style.width = Math.round((opts.progress.step / opts.progress.total) * 100) + '%';
+      bar.appendChild(fill);
+      wrap.appendChild(lbl);
+      wrap.appendChild(bar);
+      popover.appendChild(wrap);
+    }
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'ask-popover-title';
+      h.textContent = title;
+      popover.appendChild(h);
+    }
+    const body = document.createElement('div');
+    popover.appendChild(body);
+    buildFn(body);
+    popover.classList.add('open');
+    scrim.classList.add('open');
+    plusBtn.setAttribute('aria-expanded', 'true');
+    positionPopover();
+  }
+
+  function renderPopoverError(container, message){
+    const existing = container.querySelector('.ask-popover-error');
+    if (existing) existing.remove();
+    if (!message) return;
+    const e = document.createElement('div');
+    e.className = 'ask-popover-error';
+    e.textContent = message;
+    container.appendChild(e);
+  }
+
+  function renderChoiceButtons(container, choices, onPick){
+    choices.forEach(function(choice){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ask-popover-item';
+      btn.textContent = choice.label !== undefined ? choice.label : choice;
+      btn.addEventListener('click', function(){ onPick(choice.value !== undefined ? choice.value : choice); });
+      container.appendChild(btn);
+    });
+  }
+
+  // Phase 2 UI refinement pass — full-width navigation rows with a trailing
+  // chevron, used for Admin Home and Tour Detail's action list (Section 6
+  // and 8 of the pass brief: "navigation, not a form/CTA buttons"). Rows
+  // are plain data objects: { label, value, danger }. `danger` gets the
+  // same visually-separated destructive treatment as Revoke everywhere
+  // else — never an ordinary row, per the pass brief's explicit carve-out.
+  function renderNavRows(container, rows, onPick){
+    rows.forEach(function(row){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ask-popover-navrow' + (row.danger ? ' ask-popover-navrow--danger' : '');
+      const lbl = document.createElement('span');
+      lbl.textContent = row.label;
+      const chev = document.createElement('span');
+      chev.className = 'chev';
+      chev.setAttribute('aria-hidden', 'true');
+      chev.textContent = '›';
+      btn.appendChild(lbl);
+      btn.appendChild(chev);
+      btn.addEventListener('click', function(){ onPick(row.value !== undefined ? row.value : row); });
+      container.appendChild(btn);
+    });
+  }
+
+  // opts.multiline → <textarea> instead of <input> (Give Feedback's comment
+  // step wants a generously sized field, Section 4 of the pass brief).
+  // Autofocuses on render and, when opts.onEnter is given, Enter submits —
+  // both requested explicitly for Admin PIN (Section 5) and applied to
+  // every other single-field popover step for the same reason: "apply
+  // consistent treatment... for inputs" (Global Phase 2 UI System). Shift+
+  // Enter still inserts a newline in the textarea case, as expected.
+  function renderTextField(container, opts){
+    opts = opts || {};
+    const field = document.createElement(opts.multiline ? 'textarea' : 'input');
+    field.className = 'ask-popover-field' + (opts.multiline ? ' ask-popover-field--textarea' : '');
+    if (!opts.multiline) {
+      field.type = opts.masked ? 'password' : 'text';
+      if (opts.numeric) field.setAttribute('inputmode', 'numeric');
+    } else {
+      field.rows = 4;
+    }
+    if (opts.placeholder) field.placeholder = opts.placeholder;
+    if (opts.maxLength) field.maxLength = opts.maxLength;
+    if (opts.onEnter) {
+      field.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' && !(opts.multiline && !e.metaKey && !e.ctrlKey)) {
+          e.preventDefault();
+          opts.onEnter();
+        }
+      });
+    }
+    container.appendChild(field);
+    setTimeout(function(){ try { field.focus(); } catch (e) {} }, 0);
+    return field;
+  }
+
+  // Primary actions use the LiveAsk blue system (--logo-blue, via the
+  // existing site-wide .btn--liveask class) rather than the site's
+  // burgundy .btn--primary — confirmed 28 August 2026: burgundy stays
+  // reserved for the rest of the PromptWorkx site, not this component
+  // family. Destructive primary actions (Revoke, delete-confirm) pass
+  // `danger:true` instead, which gets the dedicated --danger treatment
+  // rather than looking like an ordinary blue primary action.
+  function renderActions(container, actions){
+    const row = document.createElement('div');
+    row.className = 'ask-popover-actions';
+    actions.forEach(function(a){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const variant = a.danger ? 'btn--danger' : (a.primary ? 'btn--liveask' : 'btn--ghost');
+      btn.className = 'btn btn--compact ' + variant;
+      btn.textContent = a.label;
+      btn.addEventListener('click', a.onClick);
+      row.appendChild(btn);
+    });
+    container.appendChild(row);
+  }
+
+  // Generic POST-and-parse helper — every Admin/Feedback/Restart request
+  // below is small and stateless from the client's point of view (unlike
+  // the ordinary chat pipeline, none of these touch conversationHistory),
+  // so they share this rather than each hand-rolling fetch/json().
+  function postWorker(bodyObj){
+    return fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(bodyObj)
+    }).then(function(res){ return res.json(); });
+  }
+
+  // ---- Public Customer Quick Menu (Section 6) — fetched once per page
+  // load and re-fetched every time the + menu is (re)opened at the root, so
+  // an RA's just-added/deleted item shows up for this same visitor without
+  // needing a reload. No admin auth on this request — every visitor sees
+  // it. ----
+  function fetchQuickMenuItems(){
+    return postWorker({ getQuickMenu: true }).then(function(data){
+      return (data && data.ok) ? data.items : [];
+    }).catch(function(){ return []; });
+  }
+
+  function runQuickMenuItem(item){
+    closePlusMenu();
+    if (item.type === 'page') {
+      window.location.href = item.target;
+    } else if (item.type === 'chat') {
+      document.getElementById('ask-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      submitToPanel(item.prompt, { showVisitorBubble: false, systemNote: `→ You clicked ${item.title}` });
+    } else if (item.type === 'contact') {
+      const trigger = document.querySelector('[data-nav-intent="' + item.contactIntent + '"]');
+      if (trigger) trigger.click();
+    }
+  }
+
+  // ---- LiveAsk section item: How to use LiveAsk (Section 5.1.A) ----
+  // Fixed, code-authored explanation — no Claude call, same "code decides
+  // fixed governed copy" principle as NAV_INTENTS above. Rendered as an
+  // ordinary AI bubble in the main thread (not inside the popover) since
+  // this is genuinely part of the conversation, just triggered by a menu
+  // click instead of typed text.
+  function showHowToUseLiveAsk(){
+    closePlusMenu();
+    thread.classList.add('active');
+    document.querySelector('.ask-box').classList.add('expanded');
+    const note = document.createElement('div');
+    note.className = 'ask-sysnote';
+    note.textContent = '→ You clicked How to use LiveAsk';
+    thread.appendChild(note);
+    const replyText = "I can answer questions about PromptWorkx, help you find the right service, walk you through a Guided Tour of the site if one's available, and help you get in touch with Chris when you're ready. Just ask me anything, or use the choices below.";
+    const a = document.createElement('div');
+    a.className = 'ask-msg ai';
+    a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
+    const replyP = a.querySelector('p');
+    if (isFirstAiReply()) a.insertBefore(buildPrivacyNoticeEl(), replyP);
+    replyP.textContent = replyText;
+    thread.appendChild(a);
+    conversationHistory.push({ role: 'assistant', content: replyText });
+    saveSession();
+    const choices = tourToken ? [] : ['Find the right service', `Contact ${DEPLOYMENT_COMPANY_NAME}`];
+    renderRow2(choices);
+    refreshChatCopyLink();
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  // ---- LiveAsk section item: Start new chat (Section 5.1.B) ----
+  // Omitted from the menu entirely while a Tour is active (confirmed 27
+  // August 2026 — see the v3 Addendum) — openPlusMenu below never even
+  // renders this item in that case, so there is nothing to gate here.
+  function startNewChatConfirm(){
+    renderSecondaryPanel('Start a new chat?', function(body){
+      const p = document.createElement('div');
+      p.className = 'ask-popover-note';
+      p.textContent = 'This will clear the current conversation from this browser tab.';
+      body.appendChild(p);
+      renderActions(body, [
+        { label: 'Start new chat', primary: true, onClick: function(){
+          conversationHistory = [];
+          try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+          saveSession();
+          thread.innerHTML = '';
+          document.querySelector('.ask-box').classList.remove('expanded');
+          thread.classList.remove('active');
+          ph.classList.remove('ask-fake-placeholder--final');
+          ph.textContent = prompts[0];
+          i = 0;
+          ph.classList.remove('fade');
+          startRotation();
+          closePlusMenu();
+        } },
+        { label: 'Cancel', onClick: closePlusMenu }
+      ]);
+    }, { onBack: openPlusMenu });
+  }
+
+  // ---- LiveAsk section item: Give feedback (Section 5.1.C) ----
+  // Two-step flow with a shared progress treatment (Phase 2 UI refinement
+  // pass, Sections 3-4) — quality/interaction reference only, LiveAsk's own
+  // visual identity throughout: large circular rating controls in place of
+  // the previous bare vertical "1 2 3 4 5" list, selection advances
+  // immediately to step 2 exactly as before (no change to that behaviour).
+  function giveFeedbackFlow(){
+    renderSecondaryPanel('How would you rate your overall conversation with LiveAsk?', function(body){
+      const row = document.createElement('div');
+      row.className = 'ask-popover-rating-row';
+      ['1', '2', '3', '4', '5'].forEach(function(n){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ask-popover-rating-btn';
+        btn.textContent = n;
+        btn.setAttribute('aria-label', 'Rate ' + n + ' of 5');
+        btn.addEventListener('click', function(){ giveFeedbackCommentStep(parseInt(n, 10)); });
+        row.appendChild(btn);
+      });
+      const scale = document.createElement('div');
+      scale.className = 'ask-popover-rating-scale';
+      scale.innerHTML = '<span>Not satisfied</span><span>Very satisfied</span>';
+      body.appendChild(row);
+      body.appendChild(scale);
+    }, { onBack: openPlusMenu, progress: { step: 1, total: 2 } });
+  }
+  function giveFeedbackCommentStep(rating){
+    renderSecondaryPanel("Anything you'd like to add?", function(body){
+      const field = renderTextField(body, { placeholder: 'Optional comment', multiline: true });
+      renderActions(body, [
+        { label: 'Submit', primary: true, onClick: function(){
+          postWorker({ giveFeedback: { sessionId: sessionId, rating: rating, comment: field.value } })
+            .then(function(){
+              renderSecondaryPanel('Thanks for the feedback!', function(body2){
+                renderActions(body2, [{ label: 'Done', primary: true, onClick: closePlusMenu }]);
+              });
+            })
+            .catch(function(){ renderPopoverError(body, "That didn't send — please try again."); });
+        } },
+        { label: 'Cancel', onClick: closePlusMenu }
+      ]);
+    }, { onBack: function(){ giveFeedbackFlow(); }, progress: { step: 2, total: 2 } });
+  }
+
+  // ---- LiveAsk section item: Restart Tour (Section 5.1.D) — contextual
+  // only, only ever offered by openPlusMenu when tourToken is set. ----
+  function restartTourConfirm(){
+    renderSecondaryPanel('Restart this Tour from the beginning?', function(body){
+      renderActions(body, [
+        { label: 'Restart', primary: true, onClick: function(){
+          postWorker({ restartTour: true, sessionId: sessionId, tourToken: tourToken })
+            .then(function(data){
+              closePlusMenu();
+              if (!data.ok) return;
+              conversationHistory = [{ role: 'assistant', content: data.reply }];
+              saveSession();
+              thread.innerHTML = '';
+              thread.classList.add('active');
+              document.querySelector('.ask-box').classList.add('expanded');
+              const a = document.createElement('div');
+              a.className = 'ask-msg ai';
+              a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
+              a.querySelector('p').textContent = data.reply;
+              thread.appendChild(a);
+              renderRow2(data.quickReplies || []);
+              refreshChatCopyLink();
+              thread.scrollTop = thread.scrollHeight;
+            });
+        } },
+        { label: 'Cancel', onClick: closePlusMenu }
+      ]);
+    }, { onBack: openPlusMenu });
+  }
+
+  // ====================================================================
+  // ---- Admin (Section 5.1.E, 7, 8) ----
+  // ====================================================================
+  function adminPinEntry(){
+    renderSecondaryPanel('Admin', function(body){
+      const field = renderTextField(body, { masked: true, placeholder: 'PIN', numeric: true, onEnter: function(){ submitPin(); } });
+      function submitPin(){
+        // The raw PIN travels in THIS one request only, via a dedicated
+        // field never touching messages/conversationHistory — see
+        // handleAdminAuth's own header comment in index-worker.js for why
+        // that's the whole point of this being a separate mechanism from
+        // the in-chat Book Tour PIN step.
+        postWorker({ adminAuth: { sessionId: sessionId, pin: field.value } }).then(function(data){
+          if (!data.ok) { renderPopoverError(body, data.error || "That didn't work."); field.value = ''; return; }
+          adminAuthed = { raName: data.raName };
+          adminMenu();
+        });
+      }
+      renderActions(body, [
+        { label: 'Continue', primary: true, onClick: submitPin },
+        { label: 'Cancel', onClick: closePlusMenu }
+      ]);
+    }, { onBack: openPlusMenu });
+  }
+
+  function adminAction(action, extra){
+    return postWorker({ adminAction: Object.assign({ sessionId: sessionId, action: action }, extra || {}) });
+  }
+
+  function adminMenu(){
+    renderSecondaryPanel('Admin — ' + adminAuthed.raName, function(body){
+      renderNavRows(body, [
+        { label: 'Create Tour', value: 'create' },
+        { label: 'Manage Tours', value: 'manage' },
+        { label: 'Manage Quick Menu', value: 'quickmenu' }
+      ], function(choice){
+        if (choice === 'create') adminCreateTour();
+        else if (choice === 'manage') adminManageToursList();
+        else if (choice === 'quickmenu') adminQuickMenuList();
+      });
+    }, { onBack: closePlusMenu });
+  }
+
+  // ---- Create Tour (Section 8.3) — hands off into the SAME proven
+  // bookflow engine Tour creation already uses (see adminCreateTourStart in
+  // index-worker.js). From here on, the RA continues in the ORDINARY chat
+  // panel, not the Secondary Input Layer — exactly as if they'd typed
+  // "book tour" and their PIN in chat. ----
+  function adminCreateTour(){
+    adminAction('createTourStart').then(function(data){
+      closePlusMenu();
+      if (!data.ok) return;
+      thread.classList.add('active');
+      document.querySelector('.ask-box').classList.add('expanded');
+      const note = document.createElement('div');
+      note.className = 'ask-sysnote';
+      note.textContent = '→ Admin: Create Tour';
+      thread.appendChild(note);
+      const a = document.createElement('div');
+      a.className = 'ask-msg ai';
+      a.innerHTML = `<span class="who">${AI_SPEAKER_LABEL}</span><p></p>`;
+      a.querySelector('p').textContent = data.reply;
+      thread.appendChild(a);
+      conversationHistory.push({ role: 'assistant', content: data.reply });
+      saveSession();
+      renderRow2(data.quickReplies || []);
+      refreshChatCopyLink();
+      thread.scrollTop = thread.scrollHeight;
+    });
+  }
+
+  // ---- Manage Tours (Section 8.4) ----
+  function adminManageToursList(){
+    renderSecondaryPanel('Manage Tours', function(body){
+      body.textContent = 'Loading…';
+      adminAction('manageToursList').then(function(data){
+        body.innerHTML = '';
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        const active = data.tours.filter(function(t){ return t.status === 'Active'; });
+        const expired = data.tours.filter(function(t){ return t.status === 'Expired'; });
+        function renderGroup(label, list){
+          if (list.length === 0) return;
+          const lbl = document.createElement('div');
+          lbl.className = 'ask-popover-section-label';
+          lbl.textContent = label;
+          body.appendChild(lbl);
+          list.forEach(function(t){
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'ask-popover-tourrow';
+            row.innerHTML = '<div class="txt"><div class="ttl"></div><div class="meta"></div></div><span class="chev" aria-hidden="true">›</span>';
+            row.querySelector('.ttl').textContent = t.tourName || t.guestName || '(untitled tour)';
+            row.querySelector('.meta').textContent = t.guestName ? ('Guest: ' + t.guestName) : 'Multiple recipients';
+            row.addEventListener('click', function(){ adminManageToursDetail(t.token); });
+            body.appendChild(row);
+          });
+        }
+        renderGroup('Active', active);
+        renderGroup('Expired', expired);
+        if (active.length === 0 && expired.length === 0) {
+          const p = document.createElement('div');
+          p.className = 'ask-popover-note';
+          p.textContent = "You haven't created any tours yet.";
+          body.appendChild(p);
+        }
+      });
+    }, { onBack: adminMenu });
+  }
+
+  // Tour Detail (Phase 2 UI refinement pass, Section 8) — a proper detail
+  // layer (name + status pill, then labelled metadata rows, then a
+  // clearly-separated actions area) rather than the previous flat text
+  // dump. `expiresAt` comes from the narrow, explicitly-approved backend
+  // exception in adminManageToursReview (index-worker.js) — Active/Expired
+  // here is derived client-side from that same already-stored value, the
+  // identical derivation adminManageToursList already does server-side;
+  // nothing here invents data the backend doesn't provide.
+  function adminManageToursDetail(token){
+    renderSecondaryPanel(null, function(body){
+      body.textContent = 'Loading…';
+      adminAction('manageToursReview', { token: token }).then(function(data){
+        body.innerHTML = '';
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        const t = data.tour;
+        const expired = !!(t.expiresAt && t.expiresAt < Date.now());
+
+        const head = document.createElement('div');
+        head.className = 'ask-popover-detail-head';
+        const title = document.createElement('div');
+        title.className = 'ask-popover-detail-title';
+        title.textContent = t.tourName || t.guestName || '(untitled tour)';
+        const pill = document.createElement('span');
+        pill.className = 'ask-popover-status-pill ' + (expired ? 'ask-popover-status-pill--expired' : 'ask-popover-status-pill--active');
+        pill.textContent = expired ? 'Expired' : 'Active';
+        head.appendChild(title);
+        head.appendChild(pill);
+        body.appendChild(head);
+
+        const meta = document.createElement('div');
+        meta.className = 'ask-popover-detail-meta';
+        const rows = [
+          ['Guest', t.guestName || 'Multiple recipients'],
+          ['Stops', t.destinations.join(' → ')],
+          ['Locked in', t.lockedIn ? 'Yes' : 'No (still a draft)'],
+          ['Guest visits recorded', String(t.guestSessions)],
+          ['RA preview runs recorded', String(t.previewSessions)]
+        ];
+        if (t.expiresAt) {
+          rows.push([expired ? 'Expired' : 'Expires', new Date(t.expiresAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })]);
+        }
+        rows.forEach(function(pair){
+          const row = document.createElement('div');
+          row.className = 'ask-popover-detail-row';
+          const k = document.createElement('span');
+          k.className = 'k';
+          k.textContent = pair[0];
+          const v = document.createElement('span');
+          v.className = 'v';
+          v.textContent = pair[1];
+          row.appendChild(k);
+          row.appendChild(v);
+          meta.appendChild(row);
+        });
+        body.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'ask-popover-detail-actions';
+        body.appendChild(actions);
+        // Ordinary actions get the standard nav-row treatment; Revoke is
+        // visually separated toward the bottom with the destructive
+        // treatment (Section 8's explicit requirement) via danger:true.
+        renderNavRows(actions, [
+          { label: 'Run/Test', value: 'preview' },
+          { label: 'Edit', value: 'edit' },
+          { label: 'Duplicate', value: 'duplicate' },
+          { label: 'Extend expiry', value: 'extend' },
+          { label: 'Revoke', value: 'revoke', danger: true }
+        ], function(choice){
+          if (choice === 'preview') adminManageToursPreview(token);
+          else if (choice === 'edit') adminManageToursEdit(token);
+          else if (choice === 'duplicate') adminManageToursDuplicate(token);
+          else if (choice === 'extend') adminManageToursExtend(token);
+          else if (choice === 'revoke') adminManageToursRevokeConfirm(token);
+        });
+      });
+    }, { onBack: adminManageToursList });
+  }
+
+  // Run/Test — pages through the server's already-computed narration for
+  // every stop, entirely client-side (see adminManageToursPreview's own
+  // header comment in index-worker.js: this NEVER touches the real guest
+  // link or a tourprogress: record, so it stays safe to re-run any time,
+  // including after lock-in).
+  function adminManageToursPreview(token){
+    renderSecondaryPanel('Run/Test', function(body){
+      body.textContent = 'Loading…';
+      adminAction('manageToursPreview', { token: token }).then(function(data){
+        body.innerHTML = '';
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        let idx = 0;
+        const textEl = document.createElement('div');
+        textEl.className = 'ask-popover-note';
+        body.appendChild(textEl);
+        function render(){ textEl.textContent = data.stops[idx].text; }
+        render();
+        renderActions(body, [
+          { label: 'Next', primary: true, onClick: function(){
+            if (idx < data.stops.length - 1) { idx++; render(); }
+          } },
+          { label: 'Done', onClick: function(){ adminManageToursDetail(token); } }
+        ]);
+      });
+    }, { onBack: function(){ adminManageToursDetail(token); } });
+  }
+
+  // Edit — an ordered tap-to-pick multi-select over all 4 possible
+  // destinations (see adminManageToursEditOptions's header comment in
+  // index-worker.js for why this is a one-shot select rather than the
+  // one-at-a-time conversational picker Tour creation uses).
+  function adminManageToursEdit(token){
+    renderSecondaryPanel('Edit stops', function(body){
+      body.textContent = 'Loading…';
+      adminAction('manageToursEditOptions', { token: token }).then(function(data){
+        body.innerHTML = '';
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        let picked = data.current.slice();
+        const list = document.createElement('div');
+        body.appendChild(list);
+        function renderList(){
+          list.innerHTML = '';
+          data.allDestinations.forEach(function(d){
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ask-popover-item';
+            const order = picked.indexOf(d.key);
+            btn.textContent = (order === -1 ? '☐ ' : ('☑ ' + (order + 1) + '. ')) + d.picker;
+            btn.addEventListener('click', function(){
+              if (order === -1) picked.push(d.key); else picked.splice(order, 1);
+              renderList();
+            });
+            list.appendChild(btn);
+          });
+        }
+        renderList();
+        renderActions(body, [
+          { label: 'Save', primary: true, onClick: function(){
+            adminAction('manageToursEditConfirm', { token: token, destinations: picked }).then(function(res){
+              if (!res.ok) { renderPopoverError(body, res.error); return; }
+              adminManageToursDetail(token);
+            });
+          } },
+          { label: 'Cancel', onClick: function(){ adminManageToursDetail(token); } }
+        ]);
+      });
+    }, { onBack: function(){ adminManageToursDetail(token); } });
+  }
+
+  function adminManageToursDuplicate(token){
+    adminAction('manageToursDuplicate', { token: token }).then(function(data){
+      renderSecondaryPanel('Tour duplicated', function(body){
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        const p = document.createElement('div');
+        p.className = 'ask-popover-note';
+        p.textContent = 'A new copy has been created: ' + data.tourUrl;
+        body.appendChild(p);
+        renderActions(body, [{ label: 'Done', primary: true, onClick: adminManageToursList }]);
+      });
+    });
+  }
+
+  function adminManageToursExtend(token){
+    adminAction('manageToursExtend', { token: token }).then(function(data){
+      renderSecondaryPanel('Expiry extended', function(body){
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        const p = document.createElement('div');
+        p.className = 'ask-popover-note';
+        p.textContent = 'This tour now expires ' + data.expiresInDays + ' days from today.';
+        body.appendChild(p);
+        renderActions(body, [{ label: 'Done', primary: true, onClick: function(){ adminManageToursDetail(token); } }]);
+      });
+    });
+  }
+
+  // Revoke — MVP behaviour, explicitly documented as such (see
+  // adminManageToursRevoke's header comment in index-worker.js): an
+  // immediate KV delete, no soft-revoke. The confirmation wording below is
+  // the spec's own required explicit warning (Section 8.4/Addendum), not a
+  // generic "are you sure".
+  function adminManageToursRevokeConfirm(token){
+    renderSecondaryPanel('Revoke this tour?', function(body){
+      const p = document.createElement('div');
+      p.className = 'ask-popover-note';
+      p.textContent = 'This link will stop working immediately, including for anyone currently using it. This cannot be undone.';
+      body.appendChild(p);
+      renderActions(body, [
+        { label: 'Revoke', primary: true, danger: true, onClick: function(){
+          adminAction('manageToursRevoke', { token: token }).then(function(data){
+            if (!data.ok) { renderPopoverError(body, data.error); return; }
+            adminManageToursList();
+          });
+        } },
+        { label: 'Cancel', onClick: function(){ adminManageToursDetail(token); } }
+      ]);
+    }, { onBack: function(){ adminManageToursDetail(token); } });
+  }
+
+  // ---- Manage Quick Menu (Section 7.1) ----
+  // Shared with the "Contact action" step of Add below, so the label an RA
+  // picks when adding an item and the label shown back to them in an
+  // existing item's detail view can never drift apart.
+  const CONTACT_INTENT_OPTIONS = [
+    { label: 'General contact', value: 'contact' },
+    { label: 'Book a GenCheck', value: 'book-audit' },
+    { label: 'Enquire about GenGrid', value: 'enquire-build' },
+    { label: 'PromptGuide enquiry', value: 'register-protocol' },
+    { label: 'PromptSpec enquiry', value: 'enquire-opportunity' }
+  ];
+  function contactIntentLabel(intent){
+    const found = CONTACT_INTENT_OPTIONS.find(function(o){ return o.value === intent; });
+    return found ? found.label : intent;
+  }
+  // One-line secondary summary shown under an item's title in the list —
+  // Phase 2 UI refinement pass, Section 9 — built entirely from fields the
+  // backend already returns on every item, no new data required.
+  function humanizeQuickMenuItem(item){
+    if (item.type === 'page') return 'Opens page: ' + (item.target || '');
+    if (item.type === 'chat') return 'Starts a conversation: ' + (item.prompt || '');
+    if (item.type === 'contact') return 'Contact action: ' + contactIntentLabel(item.contactIntent);
+    return '';
+  }
+
+  function adminQuickMenuList(){
+    renderSecondaryPanel('Manage Quick Menu', function(body){
+      body.textContent = 'Loading…';
+      adminAction('manageQuickMenuList').then(function(data){
+        body.innerHTML = '';
+        if (!data.ok) { renderPopoverError(body, data.error); return; }
+        if (data.items.length === 0) {
+          const p = document.createElement('div');
+          p.className = 'ask-popover-note';
+          p.textContent = "You haven't added any Quick Menu items yet.";
+          body.appendChild(p);
+        } else {
+          data.items.forEach(function(item){
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'ask-popover-itemrow';
+            row.innerHTML = '<div class="txt"><div class="ttl"></div><div class="meta"></div></div><span class="chev" aria-hidden="true">›</span>';
+            row.querySelector('.ttl').textContent = item.title;
+            row.querySelector('.meta').textContent = humanizeQuickMenuItem(item);
+            row.addEventListener('click', function(){ adminQuickMenuItemDetail(item); });
+            body.appendChild(row);
+          });
+        }
+        renderActions(body, [{ label: '+ Add menu item', primary: true, onClick: adminQuickMenuAddTitle }]);
+      });
+    }, { onBack: adminMenu });
+  }
+
+  // Item detail/manage view (Section 9): tap an existing item to see its
+  // current title/type/target, with Delete available here rather than a
+  // permanent red control sitting directly in the list. True field-level
+  // editing is explicitly deferred — this pass only restructures how an
+  // existing item is inspected and removed, no new backend action.
+  function adminQuickMenuItemDetail(item){
+    renderSecondaryPanel(item.title, function(body){
+      const meta = document.createElement('div');
+      meta.className = 'ask-popover-detail-meta';
+      const typeLabel = item.type === 'page' ? 'Opens page' : (item.type === 'chat' ? 'Starts a conversation' : 'Contact action');
+      const valueLabel = item.type === 'page' ? item.target : (item.type === 'chat' ? item.prompt : contactIntentLabel(item.contactIntent));
+      [['Type', typeLabel], ['Detail', valueLabel || '—']].forEach(function(pair){
+        const row = document.createElement('div');
+        row.className = 'ask-popover-detail-row';
+        const k = document.createElement('span');
+        k.className = 'k';
+        k.textContent = pair[0];
+        const v = document.createElement('span');
+        v.className = 'v';
+        v.textContent = pair[1];
+        row.appendChild(k);
+        row.appendChild(v);
+        meta.appendChild(row);
+      });
+      body.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'ask-popover-detail-actions';
+      body.appendChild(actions);
+      renderNavRows(actions, [{ label: 'Delete', value: 'delete', danger: true }], function(){
+        adminQuickMenuItemDeleteConfirm(item);
+      });
+    }, { onBack: adminQuickMenuList });
+  }
+
+  function adminQuickMenuItemDeleteConfirm(item){
+    renderSecondaryPanel('Delete this menu item?', function(body){
+      const p = document.createElement('div');
+      p.className = 'ask-popover-note';
+      p.textContent = '"' + item.title + '" will no longer appear in the Quick Menu.';
+      body.appendChild(p);
+      renderActions(body, [
+        { label: 'Delete', primary: true, danger: true, onClick: function(){
+          adminAction('manageQuickMenuDelete', { id: item.id }).then(function(){ adminQuickMenuList(); });
+        } },
+        { label: 'Cancel', onClick: function(){ adminQuickMenuItemDetail(item); } }
+      ]);
+    }, { onBack: function(){ adminQuickMenuItemDetail(item); } });
+  }
+
+  function adminQuickMenuAddTitle(){
+    renderSecondaryPanel('What should the menu option say?', function(body){
+      const field = renderTextField(body, { placeholder: 'e.g. Get a Quote', maxLength: 40 });
+      renderActions(body, [
+        { label: 'Next', primary: true, onClick: function(){
+          if (!field.value.trim()) { renderPopoverError(body, 'A title is required.'); return; }
+          adminQuickMenuAddType(field.value.trim());
+        } },
+        { label: 'Cancel', onClick: adminQuickMenuList }
+      ]);
+    }, { onBack: adminQuickMenuList });
+  }
+
+  function adminQuickMenuAddType(title){
+    renderSecondaryPanel('What should this option do?', function(body){
+      renderChoiceButtons(body, [
+        { label: 'Go to page', value: 'page' },
+        { label: 'Start conversation', value: 'chat' },
+        { label: 'Contact action', value: 'contact' }
+      ], function(type){ adminQuickMenuAddDetail(title, type); });
+    }, { onBack: function(){ adminQuickMenuAddTitle(); } });
+  }
+
+  function adminQuickMenuAddDetail(title, type){
+    if (type === 'page') {
+      renderSecondaryPanel('Which page?', function(body){
+        const field = renderTextField(body, { placeholder: '/liveask' });
+        renderActions(body, [
+          { label: 'Next', primary: true, onClick: function(){ adminQuickMenuAddConfirm(title, type, { target: field.value.trim() }); } },
+          { label: 'Cancel', onClick: adminQuickMenuList }
+        ]);
+      }, { onBack: function(){ adminQuickMenuAddType(title); } });
+    } else if (type === 'chat') {
+      renderSecondaryPanel('What should LiveAsk help the visitor with when they choose this?', function(body){
+        const field = renderTextField(body, { placeholder: 'e.g. Help them understand GenSeen pricing' });
+        renderActions(body, [
+          { label: 'Next', primary: true, onClick: function(){ adminQuickMenuAddConfirm(title, type, { prompt: field.value.trim() }); } },
+          { label: 'Cancel', onClick: adminQuickMenuList }
+        ]);
+      }, { onBack: function(){ adminQuickMenuAddType(title); } });
+    } else {
+      renderSecondaryPanel('Which contact action?', function(body){
+        renderChoiceButtons(body, CONTACT_INTENT_OPTIONS, function(contactIntent){ adminQuickMenuAddConfirm(title, type, { contactIntent: contactIntent }); });
+      }, { onBack: function(){ adminQuickMenuAddType(title); } });
+    }
+  }
+
+  function adminQuickMenuAddConfirm(title, type, detail){
+    renderSecondaryPanel('Add this menu option?', function(body){
+      const p = document.createElement('div');
+      p.className = 'ask-popover-note';
+      p.textContent = '"' + title + '" will appear in the Quick Menu.';
+      body.appendChild(p);
+      renderActions(body, [
+        { label: 'Confirm', primary: true, onClick: function(){
+          const item = Object.assign({ title: title, type: type }, detail);
+          adminAction('manageQuickMenuAdd', { item: item }).then(function(data){
+            if (!data.ok) { renderPopoverError(body, data.error); return; }
+            adminQuickMenuList();
+          });
+        } },
+        { label: 'Cancel', onClick: adminQuickMenuList }
+      ]);
+    }, { onBack: adminQuickMenuList });
+  }
+
+  // ---- Root `+` menu (Section 5, 6) ----
+  // Phase 2 UI refinement pass (Section 1): the customer/company section —
+  // divider, "PromptWorkx" heading, and its items — is only ever appended
+  // once the Quick Menu fetch confirms at least one item exists. With zero
+  // configured items, none of that renders (no divider, no heading, no
+  // "Nothing here yet." message) — the menu just ends after LiveAsk's own
+  // items, rather than flashing a "Loading…" placeholder first.
+  function openPlusMenu(){
+    adminAuthed = null;
+    renderSecondaryPanel(null, function(body){
+      const liveAskLabel = document.createElement('div');
+      liveAskLabel.className = 'ask-popover-section-label ask-popover-section-label--first';
+      liveAskLabel.textContent = 'LiveAsk';
+      body.appendChild(liveAskLabel);
+
+      const liveAskItems = [{ label: 'How to use LiveAsk', onClick: showHowToUseLiveAsk }];
+      // Start new chat — omitted entirely while a Tour is active (Section
+      // 5.1.B, confirmed 27 August 2026), and only offered at all once
+      // there's a real conversation to clear.
+      if (!tourToken && conversationHistory.length > 0) {
+        liveAskItems.push({ label: 'Start new chat', onClick: startNewChatConfirm });
+      }
+      liveAskItems.push({ label: 'Give feedback', onClick: giveFeedbackFlow });
+      // Restart Tour — contextual only (Section 5.1.D): shown only while a
+      // Tour is actually active.
+      if (tourToken) {
+        liveAskItems.push({ label: 'Restart Tour', onClick: restartTourConfirm });
+      }
+      liveAskItems.push({ label: 'Admin', onClick: adminPinEntry });
+      renderChoiceButtons(body, liveAskItems.map(function(it){ return { label: it.label, value: it }; }), function(it){ it.onClick(); });
+
+      fetchQuickMenuItems().then(function(items){
+        if (items.length === 0) return;
+        const divider = document.createElement('div');
+        divider.className = 'ask-popover-divider';
+        body.appendChild(divider);
+
+        const customerLabel = document.createElement('div');
+        customerLabel.className = 'ask-popover-section-label';
+        customerLabel.textContent = DEPLOYMENT_COMPANY_NAME;
+        body.appendChild(customerLabel);
+
+        renderChoiceButtons(body, items.map(function(it){ return { label: it.title, value: it }; }), runQuickMenuItem);
+        positionPopover();
+      });
+    });
+  }
+
+  plusBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if (popover.classList.contains('open')) { closePlusMenu(); return; }
+    openPlusMenu();
+  });
+  scrim.addEventListener('click', closePlusMenu);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && popover.classList.contains('open')) closePlusMenu();
+  });
+  // Reuse the panel's own existing outside-click-to-collapse exclusion —
+  // the popover lives inside #ask-panel, so submitToPanel/the main
+  // document click listener above already leaves it alone; this only needs
+  // to stop a click INSIDE the popover from bubbling up to that listener
+  // and collapsing the whole chat panel underneath it.
+  popover.addEventListener('click', function(e){ e.stopPropagation(); });
+  window.addEventListener('resize', function(){
+    if (popover.classList.contains('open')) positionPopover();
   });
 
   // Voice input — browser-native Speech-to-Text, free, client-side.
